@@ -169,7 +169,7 @@
             this.currentEmail = null;
             this.emailCheckInterval = null;
             this.maxRetries = 10;
-            this.retryDelay = 3000; // 3秒
+            this.retryDelay = 10000; // 10秒
         }
 
         // 获取验证码
@@ -582,7 +582,7 @@
         console.log('创建登录页面注册助手入口按钮');
     }
 
-    // 检测注册页面
+        // 检测注册页面
     function DetectSignupPage() {
         // 检测是否在注册页面
         if (!window.location.href.includes('/users/sign-up')) {
@@ -594,9 +594,18 @@
 
         // 等待页面元素加载
         setTimeout(() => {
+            // 检查是否在验证码页面
+            const otpInputs = document.querySelectorAll(otpInputsSelector);
+            if (otpInputs.length > 0) {
+                // 在验证码页面，直接处理验证码
+                addLog('📧 检测到验证码页面，开始自动获取验证码', 'info');
+                handleOtpStageWithAutoFetch();
+                return;
+            }
+            
             // 自动勾选复选框
             autoCheckCheckbox();
-
+            
             // 创建悬浮按钮（如果不存在）
             let floatingBtn = document.getElementById('qoder-floating-btn');
             if (!floatingBtn) {
@@ -604,7 +613,7 @@
                 document.body.appendChild(floatingBtn);
                 console.log('创建悬浮按钮');
             }
-
+            
             // 显示注册机面板
             showRegisterPanel();
         }, 1000);
