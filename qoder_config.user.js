@@ -123,18 +123,15 @@
             return {
                 // 用户自定义域名配置
                 customDomains: ['example.com', 'mydomain.com'],
-                // 临时邮箱服务配置
+                // 临时邮箱服务配置（用于接收验证码）
                 tempEmailServices: [
                     { name: 'tempmail.plus', url: 'https://tempmail.plus', enabled: true },
-                    { name: 'epin', url: 'https://epin.com', enabled: true },
-                    { name: 'temp-mail', url: 'https://temp-mail.org', enabled: false },
-                    { name: 'guerrillamail', url: 'https://guerrillamail.com', enabled: false }
+                    
                 ],
                 // 邮箱生成配置
                 autoFetchVerificationCode: true,
                 customEmailPrefix: 'qoder',
-                emailGenerationMode: 'custom', // 'custom', 'temp'
-                // tempmail.plus API配置
+                // tempmail.plus API配置（用于获取验证码）
                 tempmailConfig: {
                     apiKey: '',
                     customDomain: '',
@@ -340,25 +337,19 @@
 
     // 邮箱生成器 - 配置版
     async function generateEmail() {
-        const mode = configManager.config.emailGenerationMode;
+        // 只使用自定义域名模式
+        addLog('📧 使用自定义域名模式', 'info');
+        const customDomains = configManager.getCustomDomains();
         
-        switch (mode) {
-            
-            case 'custom':
-            default:
-                // 自定义域名模式 - 使用用户配置的域名
-                addLog('📧 使用自定义域名模式', 'info');
-                const customDomains = configManager.getCustomDomains();
-                
-                if (customDomains.length === 0) {
-                    addLog('⚠️ 未配置自定义域名，使用默认域名', 'warning');
-                }
-                
-                const selectedCustomDomain = customDomains[Math.floor(Math.random() * customDomains.length)];
-                const customEmail = generateRandomEmail(selectedCustomDomain);
-                addLog(`✅ 生成自定义域名邮箱: ${customEmail}`, 'success');
-                return customEmail;
+        if (customDomains.length === 0) {
+            addLog('⚠️ 未配置自定义域名，使用默认域名', 'warning');
+            customDomains.push('example.com', 'mydomain.com');
         }
+        
+        const selectedCustomDomain = customDomains[Math.floor(Math.random() * customDomains.length)];
+        const customEmail = generateRandomEmail(selectedCustomDomain);
+        addLog(`✅ 生成自定义域名邮箱: ${customEmail}`, 'success');
+        return customEmail;
     }
 
    
@@ -748,10 +739,9 @@
             
             <div style="margin-bottom: 20px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">📧 邮箱生成模式:</label>
-                <select id="email-mode" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                    <option value="custom" ${config.emailGenerationMode === 'custom' ? 'selected' : ''}>自定义域名</option>
-                    <option value="temp" ${config.emailGenerationMode === 'temp' ? 'selected' : ''}>临时邮箱 (tempmail.plus)</option>
-                </select>
+                <div style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background: #f5f5f5; color: #666;">
+                    自定义域名模式（使用用户配置的域名生成邮箱）
+                </div>
             </div>
             
             <div style="margin-bottom: 20px;">
@@ -760,29 +750,21 @@
                 <small style="color: #666; font-size: 12px;">例如: example.com, mydomain.com</small>
             </div>
             
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">📝 邮箱前缀:</label>
-                <input type="text" id="email-prefix" value="${config.customEmailPrefix}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="qoder">
-            </div>
+            
             
             <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🔑 tempmail.plus API配置:</label>
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🔑 验证码接收配置:</label>
+                
                 <div style="margin-bottom: 10px;">
-                    <input type="text" id="tempmail-api-key" value="${config.tempmailConfig.apiKey}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="API密钥 (可选)">
+                    <input type="text" id="tempmail-domain" value="${config.tempmailConfig.customDomain}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="tempmail.plus域名 (可选，默认使用tempmail.plus)">
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <input type="text" id="tempmail-domain" value="${config.tempmailConfig.customDomain}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="自定义域名 (可选，默认使用tempmail.plus)">
-                </div>
-                <label style="display: flex; align-items: center; margin-bottom: 8px; font-weight: 500; color: #333;">
-                    <input type="checkbox" id="tempmail-auto-create" ${config.tempmailConfig.autoCreate ? 'checked' : ''} style="margin-right: 8px;">
-                    自动创建临时邮箱
-                </label>
+                <small style="color: #666; font-size: 12px;">用于接收自定义域名邮箱转发过来的验证码</small>
             </div>
             
             <div style="margin-bottom: 20px;">
                 <label style="display: flex; align-items: center; margin-bottom: 8px; font-weight: 500; color: #333;">
                     <input type="checkbox" id="auto-fetch" ${config.autoFetchVerificationCode ? 'checked' : ''} style="margin-right: 8px;">
-                    自动获取验证码 (仅临时邮箱模式)
+                    自动获取验证码 (通过tempmail.plus接收)
                 </label>
             </div>
             
@@ -807,7 +789,6 @@
 
     // 保存配置
     function saveConfig() {
-        const emailMode = document.getElementById('email-mode').value;
         const customDomains = document.getElementById('custom-domains').value.split('\n').filter(domain => domain.trim());
         const emailPrefix = document.getElementById('email-prefix').value.trim();
         const autoFetch = document.getElementById('auto-fetch').checked;
@@ -815,17 +796,15 @@
         // tempmail.plus配置
         const tempmailApiKey = document.getElementById('tempmail-api-key').value.trim();
         const tempmailDomain = document.getElementById('tempmail-domain').value.trim();
-        const tempmailAutoCreate = document.getElementById('tempmail-auto-create').checked;
 
         const newConfig = {
-            emailGenerationMode: emailMode,
             customDomains: customDomains,
             customEmailPrefix: emailPrefix || 'qoder',
             autoFetchVerificationCode: autoFetch,
             tempmailConfig: {
                 apiKey: tempmailApiKey,
                 customDomain: tempmailDomain,
-                autoCreate: tempmailAutoCreate
+                autoCreate: true
             }
         };
 
@@ -968,7 +947,7 @@
                 addLog('📧 第四阶段：邮箱验证码页面', 'info');
                 
                 // 检查是否启用自动获取验证码
-                if (configManager.isAutoFetchEnabled() && configManager.config.emailGenerationMode === 'temp') {
+                if (configManager.isAutoFetchEnabled()) {
                     addLog('🤖 启用自动验证码获取模式', 'info');
                     await handleOtpStageWithAutoFetch();
                 } else {
