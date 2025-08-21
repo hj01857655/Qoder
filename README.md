@@ -23,7 +23,7 @@
 1. 确保已安装Tampermonkey浏览器扩展
 2. 点击以下链接安装脚本：
    ```
-   https://raw.githubusercontent.com/hj01857655/Qoder/main/qoder-userscript.js
+   https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
    ```
 
 ### 方法二：手动安装
