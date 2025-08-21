@@ -229,6 +229,13 @@
             // 使用保存的first_id获取最新邮件
             const url = `https://tempmail.plus/api/mails?email=${email}&limit=1&epin=${epin}&first_id=${this.lastFirstId}`;
             const data = await this.makeApiRequest(url, email, epin);
+            
+            // 无论是否有新邮件，都要更新first_id
+            if (data.result) {
+                this.lastFirstId = data.first_id;
+                addLog(`🔄 更新first_id: ${this.lastFirstId}`, 'debug');
+            }
+            
             if (data.result && data.mail_list && data.mail_list.length > 0) {
                 return data.mail_list[0]; // 返回最新的一封邮件
             }
