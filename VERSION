@@ -1,0 +1,25 @@
+v1.0.0
+
+Release Date: 2025-01-XX
+
+## 版本特性 / Version Features
+
+### 🎉 初始版本发布 / Initial Version Release
+- ✨ 实现完整的自动注册流程 / Complete automatic registration process implementation
+- 🎯 添加登录页面入口按钮 / Added login page entry button
+- 📊 集成详细日志记录系统 / Integrated detailed logging system
+- 🤖 实现人机验证模拟功能 / Implemented human verification simulation function
+
+### 🔧 技术特性 / Technical Features
+- 智能表单处理 / Smart form processing
+- 人机验证模拟 / Human verification simulation
+- 路由变化监听 / Route change monitoring
+- 多浏览器扩展支持 / Multi-browser extension support
+
+### 📦 支持的浏览器扩展 / Supported Browser Extensions
+- Tampermonkey
+- Scriptcat
+
+### 🌐 支持的语言 / Supported Languages
+- 中文 / Chinese
+- English
