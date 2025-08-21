@@ -132,12 +132,8 @@
                 customEmailPrefix: 'qoder',
                 // 临时邮箱服务配置
                 tempEmailConfig: {
-                    tempmail: {
-                        email: '',
-
-                        epin: ''
-                    }
-
+                    tempmail: '',
+                    epin: ''
                 }
             };
         }
@@ -757,22 +753,12 @@
             <div style="margin-bottom: 20px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🔑 临时邮箱服务配置:</label>
                                  <div style="margin-bottom: 15px;">
-                     <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">tempmail.plus 配置:</h4>
+                     <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">临时邮箱服务配置:</h4>
                      <div style="margin-bottom: 8px;">
-                         <input type="text" id="tempmail-email" value="${config.tempEmailConfig.tempmail.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
+                         <input type="text" id="tempmail" value="${config.tempEmailConfig.tempmail}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="tempmail.plus 配置 (email+epin)">
                      </div>
                      <div style="margin-bottom: 8px;">
-                         <input type="text" id="tempmail-epin" value="${config.tempEmailConfig.tempmail.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
-                     </div>
-                 </div>
-                 
-                 <div style="margin-bottom: 15px;">
-                     <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">epin 配置:</h4>
-                     <div style="margin-bottom: 8px;">
-                         <input type="text" id="epin-email" value="${config.tempEmailConfig.epin.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
-                     </div>
-                     <div style="margin-bottom: 8px;">
-                         <input type="text" id="epin-epin" value="${config.tempEmailConfig.epin.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
+                         <input type="text" id="epin" value="${config.tempEmailConfig.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="epin 配置 (email+epin)">
                      </div>
                  </div>
                 
@@ -810,26 +796,16 @@
         const customDomains = document.getElementById('custom-domains').value.split('\n').filter(domain => domain.trim());
         const autoFetch = document.getElementById('auto-fetch').checked;
 
-        // tempmail.plus配置
-        const tempmailEmail = document.getElementById('tempmail-email').value.trim();
-        const tempmailEpin = document.getElementById('tempmail-epin').value.trim();
-        
-        // epin配置
-        const epinEmail = document.getElementById('epin-email').value.trim();
-        const epinEpin = document.getElementById('epin-epin').value.trim();
+        // 临时邮箱服务配置
+        const tempmail = document.getElementById('tempmail').value.trim();
+        const epin = document.getElementById('epin').value.trim();
 
         const newConfig = {
             customDomains: customDomains,
             autoFetchVerificationCode: autoFetch,
             tempEmailConfig: {
-                tempmail: {
-                    email: tempmailEmail,
-                    epin: tempmailEpin
-                },
-                epin: {
-                    email: epinEmail,
-                    epin: epinEpin
-                }
+                tempmail: tempmail,
+                epin: epin
             }
         };
 
