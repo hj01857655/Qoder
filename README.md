@@ -27,26 +27,47 @@ A Tampermonkey/Scriptcat script for Qoder website that provides automatic regist
 
 #### Method 1: Install via Tampermonkey
 1. Ensure Tampermonkey browser extension is installed
-2. Click the following link to install the script:
-   ```
-   https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
-   ```
+2. Choose your preferred version:
+   - **Standard Version** (Auto-generated email): 
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
+     ```
+   - **Custom Email Version** (User input email):
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder_custom_email.user.js
+     ```
 
 #### Method 2: Install via Scriptcat
 1. Ensure Scriptcat browser extension is installed
    - [Chrome Web Store](https://chrome.google.com/webstore/detail/scriptcat/ndcooeababalnlpkfedmmbbbgkljhpjf)
    - [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/%E8%84%9A%E6%9C%AC%E7%8C%AB/liilgpjgabokdklappibcjfablkpcekh)
    - [Direct Download](https://github.com/scriptscat/scriptcat/releases/download/v1.0.1/scriptcat-v1.0.1-chrome.crx)
-2. Click the following link to install the script:
-   ```
-   https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
-   ```
+2. Choose your preferred version:
+   - **Standard Version** (Auto-generated email): 
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
+     ```
+   - **Custom Email Version** (User input email):
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder_custom_email.user.js
+     ```
 
 #### Method 3: Manual Installation
 1. Open Tampermonkey or Scriptcat management panel
 2. Click "New Script"
 3. Copy and paste the script content into the editor
 4. Save the script (Ctrl+S)
+
+### 📋 Version Comparison
+
+| Feature | Standard Version | Custom Email Version |
+|---------|------------------|---------------------|
+| **Email Source** | Auto-generated random email | User manually input email |
+| **Email Control** | Script automatically generates | User has full control |
+| **Use Case** | Batch registration testing | Real email registration |
+| **User Experience** | No user input required | Requires email input |
+| **Flexibility** | Limited to generated emails | High flexibility |
+| **Suitability** | Testing and development | Production use |
 
 ### 🎮 Usage
 
@@ -132,26 +153,47 @@ This project is licensed under the MIT License.
 
 #### 方法一：通过Tampermonkey安装
 1. 确保已安装Tampermonkey浏览器扩展
-2. 点击以下链接安装脚本：
-   ```
-   https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
-   ```
+2. 选择您偏好的版本：
+   - **标准版本**（自动生成邮箱）： 
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
+     ```
+   - **自定义邮箱版本**（用户输入邮箱）：
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder_custom_email.user.js
+     ```
 
 #### 方法二：通过Scriptcat安装
 1. 确保已安装Scriptcat浏览器扩展
    - [Chrome Web Store](https://chrome.google.com/webstore/detail/scriptcat/ndcooeababalnlpkfedmmbbbgkljhpjf)
    - [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/%E8%84%9A%E6%9C%AC%E7%8C%AB/liilgpjgabokdklappibcjfablkpcekh)
    - [直接下载](https://github.com/scriptscat/scriptcat/releases/download/v1.0.1/scriptcat-v1.0.1-chrome.crx)
-2. 点击以下链接安装脚本：
-   ```
-   https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
-   ```
+2. 选择您偏好的版本：
+   - **标准版本**（自动生成邮箱）： 
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
+     ```
+   - **自定义邮箱版本**（用户输入邮箱）：
+     ```
+     https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder_custom_email.user.js
+     ```
 
 #### 方法三：手动安装
 1. 打开Tampermonkey或Scriptcat管理面板
 2. 点击"新建脚本"
 3. 将脚本内容复制粘贴到编辑器中
 4. 保存脚本（Ctrl+S）
+
+### 📋 版本对比
+
+| 功能特性 | 标准版本 | 自定义邮箱版本 |
+|---------|---------|---------------|
+| **邮箱来源** | 自动生成随机邮箱 | 用户手动输入邮箱 |
+| **邮箱控制** | 脚本自动生成 | 用户完全控制 |
+| **使用场景** | 批量注册测试 | 真实邮箱注册 |
+| **用户体验** | 无需用户输入 | 需要用户输入邮箱 |
+| **灵活性** | 限于生成的邮箱 | 高度灵活 |
+| **适用性** | 测试和开发 | 生产环境使用 |
 
 ### 🎮 使用方法
 
