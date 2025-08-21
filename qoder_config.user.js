@@ -258,8 +258,11 @@
                             throw new Error('未配置tempmail.plus服务');
                         }
                         
-                        // 解析email和epin
-                        const [email, epin] = tempmailConfig.split('&epin=');
+                        // 解析配置中的email和epin
+                        const [configEmail, epin] = tempmailConfig.split('&epin=');
+                        
+                        // 使用当前邮箱（从页面提取的）而不是配置中的邮箱
+                        const email = this.currentEmail || configEmail;
                         
                         // 使用getLatestMail获取最新邮件
                         const latestMail = await this.getLatestMail(email, epin);
@@ -1691,26 +1694,26 @@
         // 设置验证码输入框的优化体验
         handleOtpStage();
 
-        // 如果没有当前邮箱，尝试从页面提取
-        if (!tempEmailManager.currentEmail) {
-            const emailSpan = document.querySelector('.verificationCode--o_u9MiU span');
-            if (emailSpan) {
-                const emailText = emailSpan.textContent;
-                const emailMatch = emailText.match(/sent to ([^:]+):/);
-                if (emailMatch) {
-                    const extractedEmail = emailMatch[1].trim();
-                    tempEmailManager.currentEmail = extractedEmail;
-                    addLog(`📧 从页面提取到邮箱: ${extractedEmail}`, 'info');
-                }
+        // 从页面提取邮箱地址
+        const emailSpan = document.querySelector('.verificationCode--o_u9MiU span');
+        let pageEmail = null;
+        if (emailSpan) {
+            const emailText = emailSpan.textContent;
+            const emailMatch = emailText.match(/sent to ([^:]+):/);
+            if (emailMatch) {
+                pageEmail = emailMatch[1].trim();
+                addLog(`📧 从页面提取到邮箱: ${pageEmail}`, 'info');
             }
         }
 
-        // 检查是否有邮箱
-        if (!tempEmailManager.currentEmail) {
-            addLog('❌ 无法获取邮箱地址，请手动输入验证码', 'error');
+        if (!pageEmail) {
+            addLog('❌ 无法从页面获取邮箱地址', 'error');
             showToast('无法获取邮箱地址，请手动输入验证码', 'error');
             return;
         }
+
+        // 更新临时邮箱管理器的当前邮箱
+        tempEmailManager.currentEmail = pageEmail;
 
         // 开始自动获取验证码
         addLog(`📧 开始监听邮箱 ${tempEmailManager.currentEmail} 获取验证码...`, 'info');
