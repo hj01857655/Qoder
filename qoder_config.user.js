@@ -195,7 +195,18 @@
                             return;
                         }
 
-                        const response = await fetch(`https://tempmail.plus/api/email/${this.currentEmail}/messages`, {
+                        // 从配置中获取tempmail配置
+                        const tempEmailConfig = configManager.getTempEmailConfig();
+                        const tempmailConfig = tempEmailConfig.tempmail;
+                        
+                        if (!tempmailConfig) {
+                            throw new Error('未配置tempmail.plus服务');
+                        }
+                        
+                        // 解析email和epin
+                        const [email, epin] = tempmailConfig.split('&epin=');
+                        
+                        const response = await fetch(`https://tempmail.plus/api/mails?email=${email}&limit=20&epin=${epin}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -208,9 +219,9 @@
 
                         const data = await response.json();
 
-                        if (data.success && data.messages && data.messages.length > 0) {
+                        if (data.result && data.mail_list && data.mail_list.length > 0) {
                             // 查找来自Qoder的邮件
-                            const qoderEmail = data.messages.find(msg =>
+                            const qoderEmail = data.mail_list.find(msg =>
                                 msg.from && msg.from.toLowerCase().includes('qoder')
                             );
 
