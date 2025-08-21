@@ -28,7 +28,7 @@ A Tampermonkey/Scriptcat script for Qoder website that provides automatic regist
 #### Method 1: Install via Tampermonkey
 1. Ensure Tampermonkey browser extension is installed
 2. Choose your preferred version:
-   - **Standard Version** (Auto-generated email): 
+   - **Entertainment Version** (Auto-generated email): 
      ```
      https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
      ```
@@ -43,7 +43,7 @@ A Tampermonkey/Scriptcat script for Qoder website that provides automatic regist
    - [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/%E8%84%9A%E6%9C%AC%E7%8C%AB/liilgpjgabokdklappibcjfablkpcekh)
    - [Direct Download](https://github.com/scriptscat/scriptcat/releases/download/v1.0.1/scriptcat-v1.0.1-chrome.crx)
 2. Choose your preferred version:
-   - **Standard Version** (Auto-generated email): 
+   - **Entertainment Version** (Auto-generated email): 
      ```
      https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
      ```
@@ -60,14 +60,14 @@ A Tampermonkey/Scriptcat script for Qoder website that provides automatic regist
 
 ### 📋 Version Comparison
 
-| Feature | Standard Version | Custom Email Version |
-|---------|------------------|---------------------|
+| Feature | Entertainment Version | Custom Email Version |
+|---------|---------------------|---------------------|
 | **Email Source** | Auto-generated random email | User manually input email |
 | **Email Control** | Script automatically generates | User has full control |
 | **Use Case** | Batch registration testing | Real email registration |
 | **User Experience** | No user input required | Requires email input |
 | **Flexibility** | Limited to generated emails | High flexibility |
-| **Suitability** | Testing and development | Production use |
+| **Suitability** | Testing and entertainment | Production use |
 
 ### 🎮 Usage
 
@@ -154,7 +154,7 @@ This project is licensed under the MIT License.
 #### 方法一：通过Tampermonkey安装
 1. 确保已安装Tampermonkey浏览器扩展
 2. 选择您偏好的版本：
-   - **标准版本**（自动生成邮箱）： 
+   - **娱乐版**（自动生成邮箱）： 
      ```
      https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
      ```
@@ -169,7 +169,7 @@ This project is licensed under the MIT License.
    - [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/%E8%84%9A%E6%9C%AC%E7%8C%AB/liilgpjgabokdklappibcjfablkpcekh)
    - [直接下载](https://github.com/scriptscat/scriptcat/releases/download/v1.0.1/scriptcat-v1.0.1-chrome.crx)
 2. 选择您偏好的版本：
-   - **标准版本**（自动生成邮箱）： 
+   - **娱乐版**（自动生成邮箱）： 
      ```
      https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
      ```
@@ -186,14 +186,14 @@ This project is licensed under the MIT License.
 
 ### 📋 版本对比
 
-| 功能特性 | 标准版本 | 自定义邮箱版本 |
-|---------|---------|---------------|
+| 功能特性 | 娱乐版 | 自定义邮箱版本 |
+|---------|-------|---------------|
 | **邮箱来源** | 自动生成随机邮箱 | 用户手动输入邮箱 |
 | **邮箱控制** | 脚本自动生成 | 用户完全控制 |
 | **使用场景** | 批量注册测试 | 真实邮箱注册 |
 | **用户体验** | 无需用户输入 | 需要用户输入邮箱 |
 | **灵活性** | 限于生成的邮箱 | 高度灵活 |
-| **适用性** | 测试和开发 | 生产环境使用 |
+| **适用性** | 测试和娱乐 | 生产环境使用 |
 
 ### 🎮 使用方法
 

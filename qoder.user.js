@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Qoder 注册助手
+// @name         Qoder 注册助手 - 娱乐版
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  在Qoder注册页面提供注册助手面板，支持自动注册功能
+// @description  在Qoder注册页面提供注册助手面板，支持自动注册功能（娱乐版）
 // @author       hj0185765
 // @match        https://qoder.com/*
 // @match        https://*.qoder.com/*
@@ -209,7 +209,7 @@
 
         panel.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin: 0; color: #333; font-size: 18px;">🚀 Qoder 注册助手</h3>
+                <h3 style="margin: 0; color: #333; font-size: 18px;">🚀 Qoder 注册助手 - 娱乐版</h3>
                 <div style="display: flex; gap: 8px;">
                     <button id="clear-logs" style="background: #ff9800; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">清空日志</button>
                     <button id="close-register-panel" style="background: none; border: none; color: #666; font-size: 20px; cursor: pointer; padding: 0; width: 24px; height: 24px;">×</button>
@@ -275,7 +275,7 @@
         `;
 
         button.innerHTML = '🚀';
-        button.title = '打开注册助手面板';
+        button.title = '打开注册助手面板（娱乐版）';
 
         // 添加悬停效果
         button.addEventListener('mouseenter', () => {
@@ -325,7 +325,7 @@
             gap: 8px;
         `;
 
-        button.innerHTML = '🚀 去注册';
+        button.innerHTML = '🚀 去注册（娱乐版）';
 
         // 添加悬停效果
         button.addEventListener('mouseenter', () => {
@@ -569,6 +569,7 @@
             // 第四阶段：邮箱验证码
             addLog('📧 第四阶段：邮箱验证码页面', 'info');
             showToast('当前是邮箱验证码阶段，请手动输入验证码后点击Continue', 'info');
+            handleOtpStage();
             updateButtonState(false);
         } else {
             addLog('⏳ 未检测到表单字段，等待页面加载', 'warning');
@@ -1124,6 +1125,235 @@
         }
 
         console.log('🚀 Qoder 注册助手已加载');
+    }
+
+    // 验证码填充优化处理函数
+    function handleOtpStage() {
+        addLog('🔧 开始优化验证码填充体验', 'info');
+        
+        // 获取所有验证码输入框
+        const otpInputs = document.querySelectorAll('.ant-otp-input');
+        
+        if (otpInputs.length === 0) {
+            addLog('❌ 未找到验证码输入框', 'error');
+            return;
+        }
+
+        addLog(`✅ 找到 ${otpInputs.length} 个验证码输入框`, 'success');
+
+        // 自动聚焦到第一个输入框
+        setTimeout(() => {
+            if (otpInputs[0]) {
+                otpInputs[0].focus();
+                addLog('🎯 自动聚焦到第一个验证码输入框', 'success');
+            }
+        }, 500);
+
+        // 设置错误监听器
+        setupOtpErrorListener();
+
+        // 为每个输入框添加事件监听
+        otpInputs.forEach((input, index) => {
+            // 填充事件监听
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // 只允许数字输入
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = value.replace(/\D/g, '');
+                    return;
+                }
+
+                // 限制每个输入框只能输入一个数字
+                if (value.length > 1) {
+                    e.target.value = value.slice(0, 1);
+                }
+
+                // 如果输入了数字，自动跳转到下一个输入框
+                if (value.length === 1 && index < otpInputs.length - 1) {
+                    setTimeout(() => {
+                        otpInputs[index + 1].focus();
+                    }, 100);
+                }
+
+                // 检查是否所有输入框都已填写
+                checkOtpCompletion();
+            });
+
+            // 退格键处理
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    setTimeout(() => {
+                        otpInputs[index - 1].focus();
+                    }, 100);
+                }
+            });
+
+            // 粘贴事件处理
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text');
+                const numbers = pastedData.replace(/\D/g, '').slice(0, otpInputs.length);
+                
+                if (numbers.length > 0) {
+                    // 填充所有输入框
+                    numbers.split('').forEach((num, i) => {
+                        if (otpInputs[i]) {
+                            otpInputs[i].value = num;
+                            // 触发input事件
+                            otpInputs[i].dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    });
+                    
+                    // 聚焦到最后一个填写的输入框或下一个空输入框
+                    const nextIndex = Math.min(numbers.length, otpInputs.length - 1);
+                    if (otpInputs[nextIndex]) {
+                        otpInputs[nextIndex].focus();
+                    }
+                }
+            });
+        });
+
+        // 添加验证码填充提示
+        addOtpInputHint();
+    }
+
+    // 设置验证码错误监听器
+    function setupOtpErrorListener() {
+        // 使用MutationObserver监听错误提示的出现
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            // 检查是否添加了错误提示
+                            const errorAlert = node.querySelector('.alert--cQdh1TE');
+                            if (errorAlert && errorAlert.textContent.includes('expired or incorrect')) {
+                                addLog('❌ 检测到验证码错误提示', 'error');
+                                showToast('验证码错误或已过期，请重新输入', 'error');
+                                
+                                // 清空所有输入框
+                                clearOtpInputs();
+                                
+                                // 重新聚焦到第一个输入框
+                                const otpInputs = document.querySelectorAll('.ant-otp-input');
+                                if (otpInputs[0]) {
+                                    setTimeout(() => {
+                                        otpInputs[0].focus();
+                                        addLog('🔄 已清空验证码输入框，请重新输入', 'info');
+                                    }, 500);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // 监听验证码容器
+        const otpContainer = document.querySelector('.verificationCode--o_u9MiU');
+        if (otpContainer) {
+            observer.observe(otpContainer, {
+                childList: true,
+                subtree: true
+            });
+            addLog('👂 已设置验证码错误监听器', 'info');
+        }
+    }
+
+    // 检查验证码是否填写完成
+    function checkOtpCompletion() {
+        const otpInputs = document.querySelectorAll('.ant-otp-input');
+        const otpCode = Array.from(otpInputs).map(input => input.value).join('');
+        
+        if (otpCode.length === otpInputs.length) {
+            addLog(`✅ 验证码填写完成: ${otpCode}`, 'success');
+            showToast('验证码填写完成！正在自动点击Continue...', 'success');
+            
+            // 自动点击Continue按钮
+            setTimeout(() => {
+                const continueBtn = document.querySelector(continueBtnSelector);
+                if (continueBtn) {
+                    addLog('🔄 自动点击Continue按钮', 'info');
+                    continueBtn.click();
+                    
+                    // 监听验证码错误
+                    setTimeout(() => {
+                        checkOtpError();
+                    }, 2000);
+                } else {
+                    addLog('❌ 未找到Continue按钮', 'error');
+                    showToast('请手动点击Continue按钮', 'warning');
+                }
+            }, 1000);
+        }
+    }
+
+    // 检查验证码错误
+    function checkOtpError() {
+        const errorAlert = document.querySelector('.alert--cQdh1TE');
+        if (errorAlert && errorAlert.textContent.includes('expired or incorrect')) {
+            addLog('❌ 验证码错误或已过期', 'error');
+            showToast('验证码错误或已过期，请重新输入', 'error');
+            
+            // 清空所有输入框
+            clearOtpInputs();
+            
+            // 重新聚焦到第一个输入框
+            const otpInputs = document.querySelectorAll('.ant-otp-input');
+            if (otpInputs[0]) {
+                otpInputs[0].focus();
+                addLog('🔄 已清空验证码输入框，请重新输入', 'info');
+            }
+        }
+    }
+
+    // 清空验证码输入框
+    function clearOtpInputs() {
+        const otpInputs = document.querySelectorAll('.ant-otp-input');
+        otpInputs.forEach(input => {
+            input.value = '';
+            // 触发input事件以更新React状态
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
+    // 添加验证码输入提示
+    function addOtpInputHint() {
+        // 查找验证码容器
+        const otpContainer = document.querySelector('.verificationCode--o_u9MiU');
+        if (!otpContainer) return;
+
+        // 检查是否已经添加过提示
+        if (document.getElementById('otp-hint')) return;
+
+        // 创建提示元素
+        const hintDiv = document.createElement('div');
+        hintDiv.id = 'otp-hint';
+        hintDiv.style.cssText = `
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f0f8ff;
+            border: 1px solid #d6e4ff;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #1890ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        `;
+
+        hintDiv.innerHTML = `
+            <span>💡 提示：</span>
+            <span>• 可以直接粘贴6位验证码</span>
+            <span>• 填充后会自动跳转</span>
+            <span>• 支持退格键返回</span>
+            <span>• 错误时会自动清空重填</span>
+        `;
+
+        // 插入到验证码容器后面
+        otpContainer.appendChild(hintDiv);
+        addLog('📝 添加验证码输入提示', 'info');
     }
 
     // 监听页面路由变化（SPA应用）
