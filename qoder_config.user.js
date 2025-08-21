@@ -755,10 +755,10 @@
                                  <div style="margin-bottom: 15px;">
                      <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">临时邮箱服务配置:</h4>
                      <div style="margin-bottom: 8px;">
-                         <input type="text" id="tempmail" value="${(config.tempEmailConfig && config.tempEmailConfig.tempmail) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="tempmail.plus">
+                         <input type="text" id="tempmail" value="${(config.tempEmailConfig && config.tempEmailConfig.tempmail) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="tempmail.plus 配置">
                      </div>
                      <div style="margin-bottom: 8px;">
-                         <input type="text" id="epin" value="${(config.tempEmailConfig && config.tempEmailConfig.epin) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="epin">
+                         <input type="text" id="epin" value="${(config.tempEmailConfig && config.tempEmailConfig.epin) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="epin 配置">
                      </div>
                  </div>
                 
