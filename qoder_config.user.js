@@ -205,15 +205,29 @@
             });
         }
 
-        // 获取邮件列表
+        // 获取邮件列表（用于初始化监控）
         async getMailList(email, epin = '', limit = 20) {
             const url = `https://tempmail.plus/api/mails?email=${email}&limit=${limit}&epin=${epin}`;
-            return await this.makeApiRequest(url, email, epin);
+            const data = await this.makeApiRequest(url, email, epin);
+            if (data.result) {
+                // 保存first_id用于后续监控
+                this.lastFirstId = data.first_id;
+            }
+            return data;
         }
 
-        // 获取最新邮件
+        // 获取最新邮件（基于first_id监控）
         async getLatestMail(email, epin = '') {
-            const url = `https://tempmail.plus/api/mails?email=${email}&limit=1&epin=${epin}`;
+            if (!this.lastFirstId) {
+                // 如果没有first_id，先获取邮件列表
+                const mailListData = await this.getMailList(email, epin, 20);
+                if (!mailListData.result || !mailListData.mail_list || mailListData.mail_list.length === 0) {
+                    return null;
+                }
+            }
+            
+            // 使用保存的first_id获取最新邮件
+            const url = `https://tempmail.plus/api/mails?email=${email}&limit=1&epin=${epin}&first_id=${this.lastFirstId}`;
             const data = await this.makeApiRequest(url, email, epin);
             if (data.result && data.mail_list && data.mail_list.length > 0) {
                 return data.mail_list[0]; // 返回最新的一封邮件
