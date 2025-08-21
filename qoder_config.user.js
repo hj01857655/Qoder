@@ -13,7 +13,7 @@
 
 (function () {
     'use strict';
-    
+
     // 所有的元素选择器
     const firstNameSelector = 'input[id="basic_firstName"]';
     const lastNameSelector = 'input[id="basic_lastName"]';
@@ -35,7 +35,7 @@
                 numbers: '0123456789'
             };
         }
-
+        //
         generate(length = 12) {
             length = Math.max(this.minLength, Math.min(this.maxLength, length));
 
@@ -125,26 +125,19 @@
                 customDomains: ['example.com', 'mydomain.com'],
                 // 临时邮箱服务配置（用于接收验证码）
                 tempEmailServices: [
-                    { name: 'tempmail.plus', url: 'https://tempmail.plus', enabled: true },
-                    { name: 'epin', url: 'https://epin.com', enabled: true }
+                    { name: 'tempmail.plus', url: 'https://tempmail.plus', enabled: true }
                 ],
                 // 邮箱生成配置
                 autoFetchVerificationCode: true,
                 customEmailPrefix: 'qoder',
-                // 临时邮箱服务API配置
+                // 临时邮箱服务配置
                 tempEmailConfig: {
                     tempmail: {
-                        apiKey: '',
-                        customDomain: '',
                         email: '',
-                        epin: ''
-                    },
-                    epin: {
-                        apiKey: '',
-                        customDomain: '',
-                        email: '',
+
                         epin: ''
                     }
+
                 }
             };
         }
@@ -191,7 +184,7 @@
             }
 
             addLog(`🔍 开始监听邮箱: ${this.currentEmail}`, 'info');
-            addLog(`⏰ 超时时间: ${timeout/1000}秒`, 'info');
+            addLog(`⏰ 超时时间: ${timeout / 1000}秒`, 'info');
 
             return new Promise((resolve) => {
                 let retryCount = 0;
@@ -218,19 +211,19 @@
                         }
 
                         const data = await response.json();
-                        
+
                         if (data.success && data.messages && data.messages.length > 0) {
                             // 查找来自Qoder的邮件
-                            const qoderEmail = data.messages.find(msg => 
+                            const qoderEmail = data.messages.find(msg =>
                                 msg.from && msg.from.toLowerCase().includes('qoder')
                             );
 
                             if (qoderEmail) {
                                 addLog(`📨 找到Qoder邮件: ${qoderEmail.subject}`, 'success');
-                                
+
                                 // 提取验证码
                                 const verificationCode = this.extractVerificationCode(qoderEmail.body || qoderEmail.text);
-                                
+
                                 if (verificationCode) {
                                     addLog(`✅ 验证码提取成功: ${verificationCode}`, 'success');
                                     this.stopEmailCheck();
@@ -252,11 +245,11 @@
 
                         // 继续监听
                         setTimeout(checkEmail, this.retryDelay);
-                        
+
                     } catch (error) {
                         addLog(`❌ 邮箱检查失败: ${error.message}`, 'error');
                         retryCount++;
-                        
+
                         if (retryCount >= this.maxRetries) {
                             this.stopEmailCheck();
                             resolve(null);
@@ -349,19 +342,19 @@
         // 只使用自定义域名模式
         addLog('📧 使用自定义域名模式', 'info');
         const customDomains = configManager.getCustomDomains();
-        
+
         if (customDomains.length === 0) {
             addLog('⚠️ 未配置自定义域名，使用默认域名', 'warning');
             customDomains.push('example.com', 'mydomain.com');
         }
-        
+
         const selectedCustomDomain = customDomains[Math.floor(Math.random() * customDomains.length)];
         const customEmail = generateRandomEmail(selectedCustomDomain);
         addLog(`✅ 生成自定义域名邮箱: ${customEmail}`, 'success');
         return customEmail;
     }
 
-   
+
 
     // 生成随机邮箱的辅助函数
     function generateRandomEmail(domain) {
@@ -378,7 +371,7 @@
     // 改进的输入值设置方法 - 针对React Ant Design表单
     function setInputValue(input, value) {
         console.log(`🔧 开始设置 ${input.id} 的值为: ${value}`);
-        
+
         let successMethod = '未知';
         let originalValue = input.value;
 
@@ -388,7 +381,7 @@
         input.select();
 
 
-        
+
 
         // // 试直接调用React的onChange回调
         try {
@@ -421,8 +414,8 @@
             console.log(`   目标值: "${value}"`);
             console.log(`   当前值: "${input.value}"`);
             console.log(`   是否成功: ${input.value === value ? '✅ 是' : '❌ 否'}`);
-            
-            
+
+
         }, 100);
     }
 
@@ -607,7 +600,7 @@
         setTimeout(() => {
             // 自动勾选复选框
             autoCheckCheckbox();
-            
+
             // 创建悬浮按钮（如果不存在）
             let floatingBtn = document.getElementById('qoder-floating-btn');
             if (!floatingBtn) {
@@ -615,7 +608,7 @@
                 document.body.appendChild(floatingBtn);
                 console.log('创建悬浮按钮');
             }
-            
+
             // 显示注册机面板
             showRegisterPanel();
         }, 1000);
@@ -670,7 +663,7 @@
             document.getElementById('start-register').addEventListener('click', startRegistration);
             document.getElementById('clear-logs').addEventListener('click', clearLogs);
             document.getElementById('open-config').addEventListener('click', showConfigPanel);
-            
+
             console.log('创建注册面板');
         }
 
@@ -687,7 +680,7 @@
             updateCurrentStage();
             window.stageMonitorInterval = setInterval(updateCurrentStage, 2000);
         }
-        
+
         // 添加初始日志
         addLog('面板已打开，等待开始注册...', 'info');
     }
@@ -739,7 +732,7 @@
         `;
 
         const config = configManager.config;
-        
+
         panel.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin: 0; color: #333; font-size: 18px;">⚙️ 配置设置</h3>
@@ -753,48 +746,35 @@
                 </div>
             </div>
             
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🌐 自定义邮箱域名 (每行一个):</label>
-                <textarea id="custom-domains" style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical;">${config.customDomains.join('\n')}</textarea>
-                <small style="color: #666; font-size: 12px;">例如: example.com, mydomain.com</small>
-            </div>
+                         <div style="margin-bottom: 20px;">
+                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🌐 自定义邮箱域名 (每行一个):</label>
+                 <textarea id="custom-domains" style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical;">${(config.customDomains || []).join('\n')}</textarea>
+                 <small style="color: #666; font-size: 12px;">例如: example.com, mydomain.com</small>
+             </div>
             
             
             
             <div style="margin-bottom: 20px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🔑 临时邮箱服务配置:</label>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">tempmail.plus 配置:</h4>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="tempmail-api-key" value="${config.tempEmailConfig.tempmail.apiKey}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="API密钥">
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="tempmail-domain" value="${config.tempEmailConfig.tempmail.customDomain}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="自定义域名">
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="tempmail-email" value="${config.tempEmailConfig.tempmail.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="tempmail-epin" value="${config.tempEmailConfig.tempmail.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">epin 配置:</h4>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="epin-api-key" value="${config.tempEmailConfig.epin.apiKey}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="API密钥">
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="epin-domain" value="${config.tempEmailConfig.epin.customDomain}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="自定义域名">
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="epin-email" value="${config.tempEmailConfig.epin.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="epin-epin" value="${config.tempEmailConfig.epin.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
-                    </div>
-                </div>
+                                 <div style="margin-bottom: 15px;">
+                     <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">tempmail.plus 配置:</h4>
+                     <div style="margin-bottom: 8px;">
+                         <input type="text" id="tempmail-email" value="${config.tempEmailConfig.tempmail.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
+                     </div>
+                     <div style="margin-bottom: 8px;">
+                         <input type="text" id="tempmail-epin" value="${config.tempEmailConfig.tempmail.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
+                     </div>
+                 </div>
+                 
+                 <div style="margin-bottom: 15px;">
+                     <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">epin 配置:</h4>
+                     <div style="margin-bottom: 8px;">
+                         <input type="text" id="epin-email" value="${config.tempEmailConfig.epin.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
+                     </div>
+                     <div style="margin-bottom: 8px;">
+                         <input type="text" id="epin-epin" value="${config.tempEmailConfig.epin.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
+                     </div>
+                 </div>
                 
                 <small style="color: #666; font-size: 12px;">用于接收自定义域名邮箱转发过来的验证码</small>
             </div>
@@ -817,7 +797,7 @@
             document.getElementById('close-config-panel').addEventListener('click', () => {
                 configPanel.style.display = 'none';
             });
-            
+
             document.getElementById('save-config').addEventListener('click', saveConfig);
             document.getElementById('reset-config').addEventListener('click', resetConfig);
         }, 100);
@@ -828,35 +808,25 @@
     // 保存配置
     function saveConfig() {
         const customDomains = document.getElementById('custom-domains').value.split('\n').filter(domain => domain.trim());
-        const emailPrefix = document.getElementById('email-prefix').value.trim();
         const autoFetch = document.getElementById('auto-fetch').checked;
-        
+
         // tempmail.plus配置
-        const tempmailApiKey = document.getElementById('tempmail-api-key').value.trim();
-        const tempmailDomain = document.getElementById('tempmail-domain').value.trim();
         const tempmailEmail = document.getElementById('tempmail-email').value.trim();
         const tempmailEpin = document.getElementById('tempmail-epin').value.trim();
         
         // epin配置
-        const epinApiKey = document.getElementById('epin-api-key').value.trim();
-        const epinDomain = document.getElementById('epin-domain').value.trim();
         const epinEmail = document.getElementById('epin-email').value.trim();
         const epinEpin = document.getElementById('epin-epin').value.trim();
 
         const newConfig = {
             customDomains: customDomains,
-            customEmailPrefix: emailPrefix || 'qoder',
             autoFetchVerificationCode: autoFetch,
             tempEmailConfig: {
                 tempmail: {
-                    apiKey: tempmailApiKey,
-                    customDomain: tempmailDomain,
                     email: tempmailEmail,
                     epin: tempmailEpin
                 },
                 epin: {
-                    apiKey: epinApiKey,
-                    customDomain: epinDomain,
                     email: epinEmail,
                     epin: epinEpin
                 }
@@ -866,7 +836,7 @@
         configManager.updateConfig(newConfig);
         addLog('✅ 配置已保存', 'success');
         showToast('配置已保存', 'success');
-        
+
         // 隐藏配置面板
         document.getElementById('qoder-config-panel').style.display = 'none';
     }
@@ -875,14 +845,14 @@
     function resetConfig() {
         const defaultConfig = configManager.getDefaultConfig();
         configManager.updateConfig(defaultConfig);
-        
+
         // 重新加载配置面板
         const configPanel = document.getElementById('qoder-config-panel');
         if (configPanel) {
             configPanel.remove();
         }
         showConfigPanel();
-        
+
         addLog('🔄 配置已重置为默认值', 'info');
         showToast('配置已重置为默认值', 'info');
     }
@@ -957,7 +927,7 @@
                 // 第一阶段：填写姓名和邮箱，然后点击Continue
                 addLog('📋 第一阶段：填写姓名和邮箱', 'info');
                 fillFirstStageForm(userInfo);
-                
+
                 // 等待填写完成后点击Continue
                 setTimeout(() => {
                     const continueBtn = document.querySelector(continueBtnSelector);
@@ -965,7 +935,7 @@
                         addLog('🔄 点击Continue按钮进入密码设置', 'info');
                         continueBtn.click();
                         showToast('已跳转到密码设置页面', 'success');
-                        
+
                         // 等待页面跳转后自动填写密码
                         setTimeout(() => {
                             addLog('⏳ 等待页面跳转完成，开始填写密码', 'info');
@@ -980,7 +950,7 @@
                 // 第二阶段：填写密码，然后点击Continue
                 addLog('🔐 第二阶段：填写密码', 'info');
                 fillSecondStageForm(userInfo);
-                
+
                 // 等待填写完成后点击Continue
                 setTimeout(() => {
                     const continueBtn = document.querySelector(continueBtnSelector);
@@ -1000,7 +970,7 @@
             } else if (otpInputs.length > 0) {
                 // 第四阶段：邮箱验证码
                 addLog('📧 第四阶段：邮箱验证码页面', 'info');
-                
+
                 // 检查是否启用自动获取验证码
                 if (configManager.isAutoFetchEnabled()) {
                     addLog('🤖 启用自动验证码获取模式', 'info');
@@ -1040,12 +1010,12 @@
         // 依次设置每个字段，增加间隔时间
         setInputValue(firstNameInput, userInfo.firstName);
         addLog(`✅ 填写姓名: ${userInfo.firstName}`, 'success');
-        
+
         setTimeout(() => {
             setInputValue(lastNameInput, userInfo.lastName);
             addLog(`✅ 填写姓氏: ${userInfo.lastName}`, 'success');
         }, 800);
-        
+
         setTimeout(() => {
             setInputValue(emailInput, userInfo.email);
             addLog(`✅ 填写邮箱: ${userInfo.email}`, 'success');
@@ -1066,34 +1036,34 @@
         }, 2400);
     }
 
-         // 填写第二阶段表单
-     function fillSecondStageForm(userInfo) {
-         const passwordInput = document.querySelector(passwordSelector);
- 
-         if (!passwordInput) {
-             addLog('❌ 未找到密码输入字段', 'error');
-             showToast('未找到密码输入字段', 'error');
-             updateButtonState(false);
-             return;
-         }
- 
-         addLog('🔐 开始填写第二阶段表单', 'info');
- 
-         // 设置密码字段
-         setInputValue(passwordInput, userInfo.password);
-         addLog(`✅ 填写密码: ${userInfo.password}`, 'success');
- 
-         addLog('🎉 第二阶段表单填写完成', 'success');
-         showToast('密码设置完成！', 'success');
-         
-         // 等待密码填写完成后自动点击Continue
+    // 填写第二阶段表单
+    function fillSecondStageForm(userInfo) {
+        const passwordInput = document.querySelector(passwordSelector);
+
+        if (!passwordInput) {
+            addLog('❌ 未找到密码输入字段', 'error');
+            showToast('未找到密码输入字段', 'error');
+            updateButtonState(false);
+            return;
+        }
+
+        addLog('🔐 开始填写第二阶段表单', 'info');
+
+        // 设置密码字段
+        setInputValue(passwordInput, userInfo.password);
+        addLog(`✅ 填写密码: ${userInfo.password}`, 'success');
+
+        addLog('🎉 第二阶段表单填写完成', 'success');
+        showToast('密码设置完成！', 'success');
+
+        // 等待密码填写完成后自动点击Continue
         setTimeout(() => {
             const continueBtn = document.querySelector(continueBtnSelector);
             if (continueBtn) {
                 addLog('🔄 密码填写完成，点击Continue按钮进入人机验证', 'info');
                 continueBtn.click();
                 showToast('已跳转到人机验证页面', 'success');
-                
+
                 // 等待页面跳转后自动开始人机验证
                 setTimeout(() => {
                     addLog('⏳ 等待人机验证页面加载完成', 'info');
@@ -1104,7 +1074,7 @@
                 updateButtonState(false);
             }
         }, 3000); // 增加点击Continue前的等待时间
-     }
+    }
 
     // 日志记录功能
     let logCount = 0;
@@ -1113,7 +1083,7 @@
     function addLog(message, type = 'info') {
         const logContainer = document.getElementById('log-container');
         const logCountElement = document.getElementById('log-count');
-        
+
         if (!logContainer) return;
 
         const timestamp = new Date().toLocaleTimeString();
@@ -1124,7 +1094,7 @@
             'error': '#ff0000',
             'debug': '#888888'
         };
-        
+
         const color = typeColors[type] || '#00ff00';
         const icon = {
             'info': 'ℹ️',
@@ -1141,23 +1111,23 @@
             word-wrap: break-word;
         `;
         logEntry.innerHTML = `<span style="color: #888;">[${timestamp}]</span> ${icon} ${message}`;
-        
+
         logContainer.appendChild(logEntry);
         logCount++;
-        
+
         // 更新日志计数
         if (logCountElement) {
             logCountElement.textContent = `${logCount} 条记录`;
         }
-        
+
         // 自动滚动到底部
         logContainer.scrollTop = logContainer.scrollHeight;
-        
+
         // 限制日志条数
         if (logContainer.children.length > maxLogs) {
             logContainer.removeChild(logContainer.firstChild);
         }
-        
+
         // 同时输出到控制台
         console.log(`[${timestamp}] ${message}`);
     }
@@ -1165,15 +1135,15 @@
     function clearLogs() {
         const logContainer = document.getElementById('log-container');
         const logCountElement = document.getElementById('log-count');
-        
+
         if (logContainer) {
             logContainer.innerHTML = '<div style="color: #888;">日志已清空...</div>';
         }
-        
+
         if (logCountElement) {
             logCountElement.textContent = '0 条记录';
         }
-        
+
         logCount = 0;
         addLog('日志已清空', 'info');
     }
@@ -1200,7 +1170,7 @@
     function showToast(message, type = 'info') {
         // 添加到日志
         addLog(message, type);
-        
+
         const toast = document.createElement('div');
         toast.textContent = message;
         toast.style.cssText = `
@@ -1251,14 +1221,14 @@
         // 查找验证码复选框元素
         const captchaCheckbox = document.querySelector('#aliyunCaptcha-checkbox-icon');
         const checkedIcon = document.querySelector('.aliyunCaptcha-checkbox-icon-checked');
-        
+
         if (!captchaCheckbox) {
             addLog('❌ 未找到验证码复选框元素', 'error');
             showToast('未找到验证码复选框元素', 'error');
             updateButtonState(false);
             return;
         }
-        
+
         if (!checkedIcon) {
             addLog('❌ 未找到验证码图标元素', 'error');
             showToast('未找到验证码图标元素', 'error');
@@ -1272,11 +1242,11 @@
         // 检查是否已经验证过 - 验证成功的真实标志
         const checkboxBody = captchaCheckbox.closest('#aliyunCaptcha-checkbox-body');
         const checkboxText = document.querySelector('#aliyunCaptcha-checkbox-text');
-        
+
         // 检查验证成功的真实标志
         const hasVerifiedClass = checkboxBody && checkboxBody.classList.contains('verified');
         const hasVerifiedText = checkboxText && checkboxText.textContent === 'Verified';
-        
+
         if (hasVerifiedClass && hasVerifiedText) {
             addLog('🎉 验证码已经通过验证', 'success');
             addLog(`  - verified类: ${hasVerifiedClass}`, 'debug');
@@ -1299,22 +1269,22 @@
         let checkInterval;
         let retryCount = 0;
         const maxRetries = 3;
-        
+
         // 创建频繁检查函数
         function checkVerificationStatus() {
             const checkboxBody = captchaCheckbox.closest('#aliyunCaptcha-checkbox-body');
             const checkboxText = document.querySelector('#aliyunCaptcha-checkbox-text');
-            
+
             const hasVerifiedClass = checkboxBody && checkboxBody.classList.contains('verified');
             const hasVerifiedText = checkboxText && checkboxText.textContent === 'Verified';
-            
+
             if (hasVerifiedClass && hasVerifiedText) {
                 addLog('🎉 验证成功！检测到验证状态', 'success');
                 addLog(`  - verified类: ${hasVerifiedClass}`, 'debug');
                 addLog(`  - verified文本: ${hasVerifiedText}`, 'debug');
                 showToast('人机验证成功！', 'success');
                 updateButtonState(false);
-                
+
                 // 清理所有定时器
                 if (verificationTimeout) {
                     clearTimeout(verificationTimeout);
@@ -1327,14 +1297,14 @@
             }
             return false;
         }
-        
+
         // 启动频繁检查（每500ms检查一次）
         checkInterval = setInterval(() => {
             if (checkVerificationStatus()) {
                 return; // 如果验证成功，停止检查
             }
         }, 500);
-        
+
         // MutationObserver作为备用检测
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -1354,17 +1324,17 @@
         // 设置超时检测
         verificationTimeout = setTimeout(() => {
             addLog('⏰ 验证超时，检查验证状态', 'warning');
-            
+
             if (checkVerificationStatus()) {
                 return; // 如果验证成功，停止检查
             }
-            
+
             // 验证失败，尝试重试
             retryCount++;
             if (retryCount < maxRetries) {
                 addLog(`⚠️ 验证可能失败，尝试重新点击... (第${retryCount}次重试)`, 'warning');
                 showToast(`验证可能失败，尝试重新点击... (第${retryCount}次重试)`, 'warning');
-                
+
                 // 重试逻辑
                 setTimeout(() => {
                     addLog('🔄 开始重试验证', 'info');
@@ -1375,7 +1345,7 @@
                 showToast('验证失败，已达到最大重试次数', 'error');
                 updateButtonState(false);
             }
-            
+
             // 清理定时器
             if (checkInterval) {
                 clearInterval(checkInterval);
@@ -1574,23 +1544,23 @@
     // 自动验证码获取处理函数
     async function handleOtpStageWithAutoFetch() {
         addLog('🤖 开始自动验证码获取流程', 'info');
-        
+
         // 设置验证码输入框的优化体验
         handleOtpStage();
-        
+
         // 开始自动获取验证码
         addLog('📧 开始监听临时邮箱获取验证码...', 'info');
-        
+
         try {
             const verificationCode = await tempEmailManager.getVerificationCode(60000); // 60秒超时
-            
+
             if (verificationCode) {
                 addLog(`✅ 自动获取到验证码: ${verificationCode}`, 'success');
                 showToast(`自动获取验证码成功: ${verificationCode}`, 'success');
-                
+
                 // 自动填充验证码
                 await autoFillVerificationCode(verificationCode);
-                
+
                 // 自动点击Continue
                 setTimeout(() => {
                     const continueBtn = document.querySelector(continueBtnSelector);
@@ -1603,11 +1573,11 @@
                         showToast('请手动点击Continue按钮', 'warning');
                     }
                 }, 2000);
-                
+
             } else {
                 addLog('❌ 自动获取验证码失败', 'error');
                 showToast('自动获取验证码失败，请手动输入', 'error');
-                
+
                 // 清理临时邮箱
                 await tempEmailManager.cleanupEmail();
             }
@@ -1620,14 +1590,14 @@
     // 自动填充验证码
     async function autoFillVerificationCode(code) {
         const otpInputs = document.querySelectorAll('.ant-otp-input');
-        
+
         if (otpInputs.length === 0) {
             addLog('❌ 未找到验证码输入框', 'error');
             return false;
         }
 
         addLog(`🔧 开始自动填充验证码: ${code}`, 'info');
-        
+
         // 清空所有输入框
         otpInputs.forEach(input => {
             input.value = '';
@@ -1638,13 +1608,13 @@
         for (let i = 0; i < Math.min(codeDigits.length, otpInputs.length); i++) {
             const input = otpInputs[i];
             const digit = codeDigits[i];
-            
+
             // 设置值
             input.value = digit;
-            
+
             // 触发input事件
             input.dispatchEvent(new Event('input', { bubbles: true }));
-            
+
             // 短暂延迟
             await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -1656,10 +1626,10 @@
     // 验证码填充优化处理函数
     function handleOtpStage() {
         addLog('🔧 开始优化验证码填充体验', 'info');
-        
+
         // 获取所有验证码输入框
         const otpInputs = document.querySelectorAll('.ant-otp-input');
-        
+
         if (otpInputs.length === 0) {
             addLog('❌ 未找到验证码输入框', 'error');
             return;
@@ -1683,7 +1653,7 @@
             // 填充事件监听
             input.addEventListener('input', (e) => {
                 const value = e.target.value;
-                
+
                 // 只允许数字输入
                 if (!/^\d*$/.test(value)) {
                     e.target.value = value.replace(/\D/g, '');
@@ -1720,7 +1690,7 @@
                 e.preventDefault();
                 const pastedData = e.clipboardData.getData('text');
                 const numbers = pastedData.replace(/\D/g, '').slice(0, otpInputs.length);
-                
+
                 if (numbers.length > 0) {
                     // 填充所有输入框
                     numbers.split('').forEach((num, i) => {
@@ -1730,7 +1700,7 @@
                             otpInputs[i].dispatchEvent(new Event('input', { bubbles: true }));
                         }
                     });
-                    
+
                     // 聚焦到最后一个填写的输入框或下一个空输入框
                     const nextIndex = Math.min(numbers.length, otpInputs.length - 1);
                     if (otpInputs[nextIndex]) {
@@ -1757,10 +1727,10 @@
                             if (errorAlert && errorAlert.textContent.includes('expired or incorrect')) {
                                 addLog('❌ 检测到验证码错误提示', 'error');
                                 showToast('验证码错误或已过期，请重新输入', 'error');
-                                
+
                                 // 清空所有输入框
                                 clearOtpInputs();
-                                
+
                                 // 重新聚焦到第一个输入框
                                 const otpInputs = document.querySelectorAll('.ant-otp-input');
                                 if (otpInputs[0]) {
@@ -1791,18 +1761,18 @@
     function checkOtpCompletion() {
         const otpInputs = document.querySelectorAll('.ant-otp-input');
         const otpCode = Array.from(otpInputs).map(input => input.value).join('');
-        
+
         if (otpCode.length === otpInputs.length) {
             addLog(`✅ 验证码填写完成: ${otpCode}`, 'success');
             showToast('验证码填写完成！正在自动点击Continue...', 'success');
-            
+
             // 自动点击Continue按钮
             setTimeout(() => {
                 const continueBtn = document.querySelector(continueBtnSelector);
                 if (continueBtn) {
                     addLog('🔄 自动点击Continue按钮', 'info');
                     continueBtn.click();
-                    
+
                     // 监听验证码错误
                     setTimeout(() => {
                         checkOtpError();
@@ -1821,10 +1791,10 @@
         if (errorAlert && errorAlert.textContent.includes('expired or incorrect')) {
             addLog('❌ 验证码错误或已过期', 'error');
             showToast('验证码错误或已过期，请重新输入', 'error');
-            
+
             // 清空所有输入框
             clearOtpInputs();
-            
+
             // 重新聚焦到第一个输入框
             const otpInputs = document.querySelectorAll('.ant-otp-input');
             if (otpInputs[0]) {
@@ -1885,13 +1855,13 @@
     // 监听页面路由变化（SPA应用）
     function setupRouteChangeListener() {
         let currentUrl = window.location.href;
-        
+
         // 监听 URL 变化
         const checkUrlChange = () => {
             if (window.location.href !== currentUrl) {
                 currentUrl = window.location.href;
                 console.log('检测到页面路由变化:', currentUrl);
-                
+
                 // 延迟执行，确保页面内容已更新
                 setTimeout(() => {
                     // 根据当前页面类型调用相应的检测函数
@@ -1907,7 +1877,7 @@
         // 使用多种方式监听路由变化
         // 1. 定时检查 URL 变化
         setInterval(checkUrlChange, 1000);
-        
+
         // 2. 监听 popstate 事件（浏览器前进后退）
         window.addEventListener('popstate', () => {
             setTimeout(() => {
@@ -1918,12 +1888,12 @@
                 }
             }, 1000);
         });
-        
+
         // 3. 监听 pushstate 和 replacestate（编程式路由）
         const originalPushState = history.pushState;
         const originalReplaceState = history.replaceState;
-        
-        history.pushState = function(...args) {
+
+        history.pushState = function (...args) {
             originalPushState.apply(history, args);
             setTimeout(() => {
                 if (window.location.href.includes('/users/sign-up')) {
@@ -1933,8 +1903,8 @@
                 }
             }, 1000);
         };
-        
-        history.replaceState = function(...args) {
+
+        history.replaceState = function (...args) {
             originalReplaceState.apply(history, args);
             setTimeout(() => {
                 if (window.location.href.includes('/users/sign-up')) {
