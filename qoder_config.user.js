@@ -209,7 +209,16 @@
                         const response = await fetch(`https://tempmail.plus/api/mails?email=${email}&limit=20&epin=${epin}`, {
                             method: 'GET',
                             headers: {
-                                'Content-Type': 'application/json',
+                                'accept': 'application/json, text/javascript, */*; q=0.01',
+                                'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+                                'cache-control': 'no-cache',
+                                'pragma': 'no-cache',
+                                'sec-fetch-dest': 'empty',
+                                'sec-fetch-mode': 'cors',
+                                'sec-fetch-site': 'same-origin',
+                                'x-requested-with': 'XMLHttpRequest',
+                                'cookie': `email=${email}`,
+                                'Referer': 'https://tempmail.plus/zh/'
                             }
                         });
 
@@ -222,22 +231,27 @@
                         if (data.result && data.mail_list && data.mail_list.length > 0) {
                             // 查找来自Qoder的邮件
                             const qoderEmail = data.mail_list.find(msg =>
-                                msg.from && msg.from.toLowerCase().includes('qoder')
+                                msg.from_mail && msg.from_mail.toLowerCase().includes('qoder')
                             );
 
                             if (qoderEmail) {
                                 addLog(`📨 找到Qoder邮件: ${qoderEmail.subject}`, 'success');
 
-                                // 提取验证码
-                                const verificationCode = this.extractVerificationCode(qoderEmail.body || qoderEmail.text);
+                                // 获取邮件内容
+                                const mailContent = await this.getMailContent(qoderEmail.mail_id, email, epin);
+                                
+                                if (mailContent) {
+                                    // 提取验证码
+                                    const verificationCode = this.extractVerificationCode(mailContent);
 
-                                if (verificationCode) {
-                                    addLog(`✅ 验证码提取成功: ${verificationCode}`, 'success');
-                                    this.stopEmailCheck();
-                                    resolve(verificationCode);
-                                    return;
-                                } else {
-                                    addLog('⚠️ 邮件中未找到验证码', 'warning');
+                                    if (verificationCode) {
+                                        addLog(`✅ 验证码提取成功: ${verificationCode}`, 'success');
+                                        this.stopEmailCheck();
+                                        resolve(verificationCode);
+                                        return;
+                                    } else {
+                                        addLog('⚠️ 邮件中未找到验证码', 'warning');
+                                    }
                                 }
                             }
                         }
@@ -298,6 +312,42 @@
             if (this.emailCheckInterval) {
                 clearInterval(this.emailCheckInterval);
                 this.emailCheckInterval = null;
+            }
+        }
+
+        // 获取邮件内容
+        async getMailContent(mailId, email, epin) {
+            try {
+                const response = await fetch(`https://tempmail.plus/api/mail/${mailId}?email=${email}&epin=${epin}`, {
+                    method: 'GET',
+                    headers: {
+                        'accept': 'application/json, text/javascript, */*; q=0.01',
+                        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+                        'cache-control': 'no-cache',
+                        'pragma': 'no-cache',
+                        'sec-fetch-dest': 'empty',
+                        'sec-fetch-mode': 'cors',
+                        'sec-fetch-site': 'same-origin',
+                        'x-requested-with': 'XMLHttpRequest',
+                        'cookie': `email=${email}`,
+                        'Referer': 'https://tempmail.plus/zh/'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.result && data.mail) {
+                    return data.mail.body || data.mail.text || '';
+                }
+                
+                return null;
+            } catch (error) {
+                addLog(`❌ 获取邮件内容失败: ${error.message}`, 'error');
+                return null;
             }
         }
 
