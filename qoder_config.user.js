@@ -289,34 +289,9 @@
         extractVerificationCode(emailContent) {
             if (!emailContent) return null;
 
-            // 使用更精确的正则表达式，匹配带空格的6位数字验证码
-            const codeMatch = emailContent.match(/(?<![a-zA-Z@.])\b\d{6}\b/);
-            if (codeMatch) {
-                return codeMatch[0];
-            }
-
-            // 备用模式：匹配带空格的6位数字
-            const spaceCodeMatch = emailContent.match(/(\d{1}\s+\d{1}\s+\d{1}\s+\d{1}\s+\d{1}\s+\d{1})/);
-            if (spaceCodeMatch) {
-                return spaceCodeMatch[0].replace(/\s+/g, '');
-            }
-
-            // 其他备用模式
-            const patterns = [
-                /verification code[:\s]*(\d{6})/i, // verification code: 123456
-                /code[:\s]*(\d{6})/i, // code: 123456
-                /(\d{6})/, // 6位数字
-                /(\d{4,8})/ // 4-8位数字
-            ];
-
-            for (const pattern of patterns) {
-                const match = emailContent.match(pattern);
-                if (match && match[1]) {
-                    return match[1];
-                }
-            }
-
-            return null;
+            // 匹配带空格的6位数字验证码
+            const codeMatch = emailContent.match(/(\d{1}\s+\d{1}\s+\d{1}\s+\d{1}\s+\d{1}\s+\d{1})/);
+            return codeMatch ? codeMatch[0].replace(/\s+/g, '') : null;
         }
 
         // 停止邮箱检查
@@ -413,8 +388,9 @@
         const customDomains = configManager.getCustomDomains();
 
         if (customDomains.length === 0) {
-            addLog('⚠️ 未配置自定义域名，使用默认域名', 'warning');
-            customDomains.push('example.com', 'mydomain.com');
+            addLog('❌ 未配置自定义域名，请先在配置面板中设置域名', 'error');
+            showToast('请先在配置面板中设置自定义域名', 'error');
+            return null;
         }
 
         const selectedCustomDomain = customDomains[Math.floor(Math.random() * customDomains.length)];
