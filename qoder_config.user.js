@@ -289,11 +289,23 @@
         extractVerificationCode(emailContent) {
             if (!emailContent) return null;
 
-            // 多种验证码匹配模式
+            // 使用更精确的正则表达式，匹配带空格的6位数字验证码
+            const codeMatch = emailContent.match(/(?<![a-zA-Z@.])\b\d{6}\b/);
+            if (codeMatch) {
+                return codeMatch[0];
+            }
+
+            // 备用模式：匹配带空格的6位数字
+            const spaceCodeMatch = emailContent.match(/(\d{1}\s+\d{1}\s+\d{1}\s+\d{1}\s+\d{1}\s+\d{1})/);
+            if (spaceCodeMatch) {
+                return spaceCodeMatch[0].replace(/\s+/g, '');
+            }
+
+            // 其他备用模式
             const patterns = [
-                /(\d{6})/, // 6位数字
                 /verification code[:\s]*(\d{6})/i, // verification code: 123456
                 /code[:\s]*(\d{6})/i, // code: 123456
+                /(\d{6})/, // 6位数字
                 /(\d{4,8})/ // 4-8位数字
             ];
 
