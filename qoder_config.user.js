@@ -211,6 +211,16 @@
             return await this.makeApiRequest(url, email, epin);
         }
 
+        // 获取最新邮件
+        async getLatestMail(email, epin = '') {
+            const url = `https://tempmail.plus/api/mails?email=${email}&limit=1&epin=${epin}`;
+            const data = await this.makeApiRequest(url, email, epin);
+            if (data.result && data.mail_list && data.mail_list.length > 0) {
+                return data.mail_list[0]; // 返回最新的一封邮件
+            }
+            return null;
+        }
+
         // 获取邮件详情
         async getMailDetail(mailId, email, epin = '') {
             const url = `https://tempmail.plus/api/mail/${mailId}?email=${email}&epin=${epin}`;
@@ -251,32 +261,16 @@
                         // 解析email和epin
                         const [email, epin] = tempmailConfig.split('&epin=');
                         
-                        // 使用封装的API方法获取邮件列表
-                        const data = await this.getMailList(email, epin, 20);
+                        // 使用getLatestMail获取最新邮件
+                        const latestMail = await this.getLatestMail(email, epin);
                         
-                        // 检查API错误响应
-                        if (!data.result && data.err) {
-                            if (data.err.code === 1021 && data.err.msg === "Pin not valid.") {
-                                addLog('❌ epin无效，请检查配置中的epin值', 'error');
-                                showToast('epin配置无效，请检查配置', 'error');
-                                this.stopEmailCheck();
-                                resolve(null);
-                                return;
-                            }
-                            throw new Error(`API错误: ${data.err.msg}`);
-                        }
-
-                        if (data.result && data.mail_list && data.mail_list.length > 0) {
-                            // 查找来自Qoder的邮件
-                            const qoderEmail = data.mail_list.find(msg =>
-                                msg.from_mail && msg.from_mail.toLowerCase().includes('qoder')
-                            );
-
-                            if (qoderEmail) {
-                                addLog(`📨 找到Qoder邮件: ${qoderEmail.subject}`, 'success');
+                        if (latestMail) {
+                            // 检查是否来自Qoder
+                            if (latestMail.from_mail && latestMail.from_mail.toLowerCase().includes('qoder')) {
+                                addLog(`📨 找到Qoder邮件: ${latestMail.subject}`, 'success');
 
                                 // 获取邮件内容
-                                const mailContent = await this.getMailContent(qoderEmail.mail_id, email, epin);
+                                const mailContent = await this.getMailContent(latestMail.mail_id, email, epin);
                                 
                                 if (mailContent) {
                                     // 提取验证码
@@ -291,7 +285,11 @@
                                         addLog('⚠️ 邮件中未找到验证码', 'warning');
                                     }
                                 }
+                            } else {
+                                addLog('📧 最新邮件不是来自Qoder，继续监听...', 'info');
                             }
+                        } else {
+                            addLog('📭 暂无新邮件，继续监听...', 'info');
                         }
 
                         retryCount++;
@@ -430,9 +428,9 @@
 
 
 
-        // // 试直接调用React的onChange回调
+        // // 直接调用React的onChange回调
         try {
-            console.log('🔄 尝试方法7: 直接调用React onChange');
+            console.log('🔄直接调用React onChange');
             // 查找React组件实例
             const reactKey = Object.keys(input).find(key => key.startsWith('__reactProps$'));
             if (reactKey && input[reactKey] && input[reactKey].onChange) {
@@ -443,7 +441,7 @@
                     type: 'change'
                 });
                 if (input.value === value && successMethod === '未知') {
-                    successMethod = '方法7: 直接调用React onChange';
+                    successMethod = ' 直接调用React onChange';
                     console.log(`✅ ${successMethod} 成功`);
                 }
             } else {
@@ -650,6 +648,15 @@
             if (otpInputs.length > 0) {
                 // 在验证码页面，直接处理验证码
                 addLog('📧 检测到验证码页面，开始自动获取验证码', 'info');
+                
+                // 检查是否有当前邮箱
+                if (!tempEmailManager.currentEmail) {
+                    addLog('❌ 未找到当前邮箱，无法自动获取验证码', 'error');
+                    showToast('请先完成注册流程或手动输入验证码', 'warning');
+                    return;
+                }
+                
+                addLog(`📧 使用邮箱: ${tempEmailManager.currentEmail}`, 'info');
                 handleOtpStageWithAutoFetch();
                 return;
             }
@@ -1339,6 +1346,21 @@
     function simulateHumanVerification() {
         addLog('🤖 开始模拟人机验证', 'info');
 
+        // 检查是否有错误信息
+        const errorMessage = document.querySelector('.ant-alert-message');
+        if (errorMessage) {
+            const errorText = errorMessage.textContent.trim();
+            addLog(`❌ 检测到错误: ${errorText}`, 'error');
+            
+            // 特殊处理人机验证错误
+            if (errorText.includes('Unable to verify the user is human')) {
+                addLog('🤖 检测到人机验证失败，需要手动完成验证', 'warning');
+                showToast('请手动完成人机验证后重试', 'warning');
+                updateButtonState(false);
+                return;
+            }
+        }
+
         // 查找验证码复选框元素
         const captchaCheckbox = document.querySelector('#aliyunCaptcha-checkbox-icon');
         const checkedIcon = document.querySelector('.aliyunCaptcha-checkbox-icon-checked');
@@ -1669,8 +1691,29 @@
         // 设置验证码输入框的优化体验
         handleOtpStage();
 
+        // 如果没有当前邮箱，尝试从页面提取
+        if (!tempEmailManager.currentEmail) {
+            const emailSpan = document.querySelector('.verificationCode--o_u9MiU span');
+            if (emailSpan) {
+                const emailText = emailSpan.textContent;
+                const emailMatch = emailText.match(/sent to ([^:]+):/);
+                if (emailMatch) {
+                    const extractedEmail = emailMatch[1].trim();
+                    tempEmailManager.currentEmail = extractedEmail;
+                    addLog(`📧 从页面提取到邮箱: ${extractedEmail}`, 'info');
+                }
+            }
+        }
+
+        // 检查是否有邮箱
+        if (!tempEmailManager.currentEmail) {
+            addLog('❌ 无法获取邮箱地址，请手动输入验证码', 'error');
+            showToast('无法获取邮箱地址，请手动输入验证码', 'error');
+            return;
+        }
+
         // 开始自动获取验证码
-        addLog('📧 开始监听临时邮箱获取验证码...', 'info');
+        addLog(`📧 开始监听邮箱 ${tempEmailManager.currentEmail} 获取验证码...`, 'info');
 
         try {
             const verificationCode = await tempEmailManager.getVerificationCode(60000); // 60秒超时
