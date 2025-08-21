@@ -126,16 +126,25 @@
                 // 临时邮箱服务配置（用于接收验证码）
                 tempEmailServices: [
                     { name: 'tempmail.plus', url: 'https://tempmail.plus', enabled: true },
-                    
+                    { name: 'epin', url: 'https://epin.com', enabled: true }
                 ],
                 // 邮箱生成配置
                 autoFetchVerificationCode: true,
                 customEmailPrefix: 'qoder',
-                // tempmail.plus API配置（用于获取验证码）
-                tempmailConfig: {
-                    apiKey: '',
-                    customDomain: '',
-                    autoCreate: true
+                // 临时邮箱服务API配置
+                tempEmailConfig: {
+                    tempmail: {
+                        apiKey: '',
+                        customDomain: '',
+                        email: '',
+                        epin: ''
+                    },
+                    epin: {
+                        apiKey: '',
+                        customDomain: '',
+                        email: '',
+                        epin: ''
+                    }
                 }
             };
         }
@@ -157,8 +166,8 @@
             return this.config.autoFetchVerificationCode;
         }
 
-        getTempmailConfig() {
-            return this.config.tempmailConfig;
+        getTempEmailConfig() {
+            return this.config.tempEmailConfig;
         }
     }
 
@@ -197,7 +206,7 @@
                             return;
                         }
 
-                        const response = await fetch(`https://tempmail.plus/api/v1/email/${this.currentEmail}/messages`, {
+                        const response = await fetch(`https://tempmail.plus/api/email/${this.currentEmail}/messages`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -297,7 +306,7 @@
             if (!this.currentEmail) return;
 
             try {
-                await fetch(`https://tempmail.plus/api/v1/email/${this.currentEmail}/delete`, {
+                await fetch(`https://tempmail.plus/api/email/${this.currentEmail}/delete`, {
                     method: 'DELETE'
                 });
                 addLog('🗑️ 临时邮箱已清理', 'info');
@@ -753,11 +762,40 @@
             
             
             <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🔑 验证码接收配置:</label>
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🔑 临时邮箱服务配置:</label>
                 
-                <div style="margin-bottom: 10px;">
-                    <input type="text" id="tempmail-domain" value="${config.tempmailConfig.customDomain}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="tempmail.plus域名 (可选，默认使用tempmail.plus)">
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">tempmail.plus 配置:</h4>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="tempmail-api-key" value="${config.tempEmailConfig.tempmail.apiKey}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="API密钥">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="tempmail-domain" value="${config.tempEmailConfig.tempmail.customDomain}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="自定义域名">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="tempmail-email" value="${config.tempEmailConfig.tempmail.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="tempmail-epin" value="${config.tempEmailConfig.tempmail.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
+                    </div>
                 </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">epin 配置:</h4>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="epin-api-key" value="${config.tempEmailConfig.epin.apiKey}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="API密钥">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="epin-domain" value="${config.tempEmailConfig.epin.customDomain}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="自定义域名">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="epin-email" value="${config.tempEmailConfig.epin.email}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="邮箱地址">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="epin-epin" value="${config.tempEmailConfig.epin.epin}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="EPIN">
+                    </div>
+                </div>
+                
                 <small style="color: #666; font-size: 12px;">用于接收自定义域名邮箱转发过来的验证码</small>
             </div>
             
@@ -796,15 +834,32 @@
         // tempmail.plus配置
         const tempmailApiKey = document.getElementById('tempmail-api-key').value.trim();
         const tempmailDomain = document.getElementById('tempmail-domain').value.trim();
+        const tempmailEmail = document.getElementById('tempmail-email').value.trim();
+        const tempmailEpin = document.getElementById('tempmail-epin').value.trim();
+        
+        // epin配置
+        const epinApiKey = document.getElementById('epin-api-key').value.trim();
+        const epinDomain = document.getElementById('epin-domain').value.trim();
+        const epinEmail = document.getElementById('epin-email').value.trim();
+        const epinEpin = document.getElementById('epin-epin').value.trim();
 
         const newConfig = {
             customDomains: customDomains,
             customEmailPrefix: emailPrefix || 'qoder',
             autoFetchVerificationCode: autoFetch,
-            tempmailConfig: {
-                apiKey: tempmailApiKey,
-                customDomain: tempmailDomain,
-                autoCreate: true
+            tempEmailConfig: {
+                tempmail: {
+                    apiKey: tempmailApiKey,
+                    customDomain: tempmailDomain,
+                    email: tempmailEmail,
+                    epin: tempmailEpin
+                },
+                epin: {
+                    apiKey: epinApiKey,
+                    customDomain: epinDomain,
+                    email: epinEmail,
+                    epin: epinEpin
+                }
             }
         };
 
