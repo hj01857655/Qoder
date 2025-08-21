@@ -6,7 +6,7 @@
 // @author       hj0185765
 // @match        https://qoder.com/*
 // @match        https://*.qoder.com/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
 // @updateURL    https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder_config.user.js
 // @downloadURL  https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder_config.user.js
 // ==/UserScript==
@@ -206,27 +206,35 @@
                         // 解析email和epin
                         const [email, epin] = tempmailConfig.split('&epin=');
                         
-                        const response = await fetch(`https://tempmail.plus/api/mails?email=${email}&limit=20&epin=${epin}`, {
-                            method: 'GET',
-                            headers: {
-                                'accept': 'application/json, text/javascript, */*; q=0.01',
-                                'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-                                'cache-control': 'no-cache',
-                                'pragma': 'no-cache',
-                                'sec-fetch-dest': 'empty',
-                                'sec-fetch-mode': 'cors',
-                                'sec-fetch-site': 'same-origin',
-                                'x-requested-with': 'XMLHttpRequest',
-                                'cookie': `email=${email}`,
-                                'Referer': 'https://tempmail.plus/zh/'
-                            }
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
-                        }
-
-                        const data = await response.json();
+                                                    const data = await new Promise((resolve, reject) => {
+                                GM_xmlhttpRequest({
+                                    method: 'GET',
+                                    url: `https://tempmail.plus/api/mails?email=${email}&limit=20&epin=${epin}`,
+                                    headers: {
+                                        'accept': 'application/json, text/javascript, */*; q=0.01',
+                                        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+                                        'cache-control': 'no-cache',
+                                        'pragma': 'no-cache',
+                                        'sec-fetch-dest': 'empty',
+                                        'sec-fetch-mode': 'cors',
+                                        'sec-fetch-site': 'same-origin',
+                                        'x-requested-with': 'XMLHttpRequest',
+                                        'cookie': `email=${email}`,
+                                        'Referer': 'https://tempmail.plus/zh/'
+                                    },
+                                    onload: function(response) {
+                                        try {
+                                            const data = JSON.parse(response.responseText);
+                                            resolve(data);
+                                        } catch (error) {
+                                            reject(new Error(`解析响应失败: ${error.message}`));
+                                        }
+                                    },
+                                    onerror: function(error) {
+                                        reject(new Error(`HTTP ${error.status}: ${error.statusText}`));
+                                    }
+                                });
+                            });
                         
                         // 检查API错误响应
                         if (!data.result && data.err) {
@@ -317,27 +325,35 @@
         // 获取邮件内容
         async getMailContent(mailId, email, epin) {
             try {
-                const response = await fetch(`https://tempmail.plus/api/mail/${mailId}?email=${email}&epin=${epin}`, {
-                    method: 'GET',
-                    headers: {
-                        'accept': 'application/json, text/javascript, */*; q=0.01',
-                        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-                        'cache-control': 'no-cache',
-                        'pragma': 'no-cache',
-                        'sec-fetch-dest': 'empty',
-                        'sec-fetch-mode': 'cors',
-                        'sec-fetch-site': 'same-origin',
-                        'x-requested-with': 'XMLHttpRequest',
-                        'cookie': `email=${email}`,
-                        'Referer': 'https://tempmail.plus/zh/'
-                    }
+                const data = await new Promise((resolve, reject) => {
+                    GM_xmlhttpRequest({
+                        method: 'GET',
+                        url: `https://tempmail.plus/api/mail/${mailId}?email=${email}&epin=${epin}`,
+                        headers: {
+                            'accept': 'application/json, text/javascript, */*; q=0.01',
+                            'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+                            'cache-control': 'no-cache',
+                            'pragma': 'no-cache',
+                            'sec-fetch-dest': 'empty',
+                            'sec-fetch-mode': 'cors',
+                            'sec-fetch-site': 'same-origin',
+                            'x-requested-with': 'XMLHttpRequest',
+                            'cookie': `email=${email}`,
+                            'Referer': 'https://tempmail.plus/zh/'
+                        },
+                        onload: function(response) {
+                            try {
+                                const data = JSON.parse(response.responseText);
+                                resolve(data);
+                            } catch (error) {
+                                reject(new Error(`解析响应失败: ${error.message}`));
+                            }
+                        },
+                        onerror: function(error) {
+                            reject(new Error(`HTTP ${error.status}: ${error.statusText}`));
+                        }
+                    });
                 });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
                 
                 if (data.result && data.mail) {
                     return data.mail.body || data.mail.text || '';
@@ -824,12 +840,12 @@
                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">🔑 临时邮箱服务配置:</label>
                                  <div style="margin-bottom: 15px;">
                      <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">临时邮箱服务配置:</h4>
-                     <div style="margin-bottom: 8px;">
-                         <input type="text" id="tempmail" value="${(config.tempEmailConfig && config.tempEmailConfig.tempmail) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="tempmail.plus 配置">
-                     </div>
-                     <div style="margin-bottom: 8px;">
-                         <input type="text" id="epin" value="${(config.tempEmailConfig && config.tempEmailConfig.epin) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="epin 配置">
-                     </div>
+                                         <div style="margin-bottom: 8px;">
+                        <input type="text" id="tempmail" value="${(config.tempEmailConfig && config.tempEmailConfig.tempmail) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="tempmail.plus 配置" style="::placeholder { color: #999; }">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="epin" value="${(config.tempEmailConfig && config.tempEmailConfig.epin) || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="epin 配置" style="::placeholder { color: #999; }">
+                    </div>
                  </div>
                 
                 <small style="color: #666; font-size: 12px;">用于接收自定义域名邮箱转发过来的验证码</small>
@@ -861,8 +877,83 @@
         return panel;
     }
 
+    // 测试配置
+    async function testConfig(config) {
+        try {
+            // 测试tempmail配置
+            if (config.tempEmailConfig && config.tempEmailConfig.tempmail) {
+                const tempmailConfig = config.tempEmailConfig.tempmail;
+                
+                // 解析email和epin
+                const [email, epin] = tempmailConfig.split('&epin=');
+                
+                if (!email) {
+                    addLog('❌ tempmail配置格式错误', 'error');
+                    return false;
+                }
+                
+                // 使用TempEmailManager测试API调用
+                const tempEmailManager = new TempEmailManager();
+                const testResult = await new Promise((resolve) => {
+                    GM_xmlhttpRequest({
+                        method: 'GET',
+                        url: `https://tempmail.plus/api/mails?email=${email}&limit=5&epin=${epin || ''}`,
+                        headers: {
+                            'accept': 'application/json, text/javascript, */*; q=0.01',
+                            'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+                            'cache-control': 'no-cache',
+                            'pragma': 'no-cache',
+                            'sec-fetch-dest': 'empty',
+                            'sec-fetch-mode': 'cors',
+                            'sec-fetch-site': 'same-origin',
+                            'x-requested-with': 'XMLHttpRequest',
+                            'cookie': `email=${email}`,
+                            'Referer': 'https://tempmail.plus/zh/'
+                        },
+                        onload: function(response) {
+                            try {
+                                const data = JSON.parse(response.responseText);
+                                
+                                // 检查API错误响应
+                                if (!data.result && data.err) {
+                                    if (data.err.code === 1021 && data.err.msg === "Pin not valid.") {
+                                        addLog('❌ epin无效，请检查epin配置', 'error');
+                                        resolve(false);
+                                        return;
+                                    }
+                                    addLog(`❌ tempmail API错误: ${data.err.msg}`, 'error');
+                                    resolve(false);
+                                    return;
+                                }
+                                
+                                addLog('✅ tempmail配置验证通过', 'success');
+                                resolve(true);
+                            } catch (error) {
+                                addLog(`❌ 解析响应失败: ${error.message}`, 'error');
+                                resolve(false);
+                            }
+                        },
+                        onerror: function(error) {
+                            addLog(`❌ tempmail API调用失败: ${error.statusText}`, 'error');
+                            resolve(false);
+                        }
+                    });
+                });
+                
+                if (!testResult) {
+                    return false;
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            addLog(`❌ 配置测试失败: ${error.message}`, 'error');
+            return false;
+        }
+    }
+
     // 保存配置
-    function saveConfig() {
+    async function saveConfig() {
         const customDomains = document.getElementById('custom-domains').value.split('\n').filter(domain => domain.trim());
         const autoFetch = document.getElementById('auto-fetch').checked;
 
@@ -879,10 +970,20 @@
             }
         };
 
-        configManager.updateConfig(newConfig);
-        addLog('✅ 配置已保存', 'success');
-        showToast('配置已保存', 'success');
-
+                // 测试配置
+        addLog('🧪 正在测试配置...', 'info');
+        const testResult = await testConfig(newConfig);
+        
+        if (testResult) {
+            configManager.updateConfig(newConfig);
+            addLog('✅ 配置验证通过，已保存', 'success');
+            showToast('配置验证通过，已保存', 'success');
+        } else {
+            addLog('❌ 配置验证失败，请检查配置', 'error');
+            showToast('配置验证失败，请检查配置', 'error');
+            return;
+        }
+        
         // 隐藏配置面板
         document.getElementById('qoder-config-panel').style.display = 'none';
     }
