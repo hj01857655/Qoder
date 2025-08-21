@@ -227,6 +227,18 @@
                         }
 
                         const data = await response.json();
+                        
+                        // 检查API错误响应
+                        if (!data.result && data.err) {
+                            if (data.err.code === 1021 && data.err.msg === "Pin not valid.") {
+                                addLog('❌ epin无效，请检查配置中的epin值', 'error');
+                                showToast('epin配置无效，请检查配置', 'error');
+                                this.stopEmailCheck();
+                                resolve(null);
+                                return;
+                            }
+                            throw new Error(`API错误: ${data.err.msg}`);
+                        }
 
                         if (data.result && data.mail_list && data.mail_list.length > 0) {
                             // 查找来自Qoder的邮件
@@ -936,6 +948,32 @@
         updateButtonState(true); // 设置按钮为运行状态
 
         try {
+            // 验证配置
+            const config = configManager.config;
+            
+            // 检查自定义域名配置
+            if (!config.customDomains || config.customDomains.length === 0) {
+                addLog('❌ 未配置自定义域名，请先在配置面板中设置域名', 'error');
+                showToast('请先在配置面板中设置自定义域名', 'error');
+                updateButtonState(false);
+                return;
+            }
+            
+            // 检查tempmail配置
+            if (!config.tempEmailConfig || !config.tempEmailConfig.tempmail) {
+                addLog('❌ 未配置tempmail.plus服务，请先在配置面板中设置', 'error');
+                showToast('请先在配置面板中设置tempmail.plus服务', 'error');
+                updateButtonState(false);
+                return;
+            }
+            
+            // 检查epin配置（可为空，但如果有值需要验证格式）
+            if (config.tempEmailConfig.epin && config.tempEmailConfig.epin.trim() === '') {
+                addLog('⚠️ epin配置为空，如果临时邮箱服务需要epin，请配置正确的值', 'warning');
+            }
+            
+            addLog('✅ 配置验证通过', 'success');
+
             // 生成用户信息（异步）
             const userInfo = {
                 firstName: generateFirstName(),
