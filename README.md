@@ -28,6 +28,9 @@
 
 ### 方法二：通过Scriptcat安装
 1. 确保已安装Scriptcat浏览器扩展
+   - [Chrome Web Store](https://chrome.google.com/webstore/detail/scriptcat/ndcooeababalnlpkfedmmbbbgkljhpjf)
+   - [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/%E8%84%9A%E6%9C%AC%E7%8C%AB/liilgpjgabokdklappibcjfablkpcekh)
+   - [直接下载](https://github.com/scriptscat/scriptcat/releases/download/v1.0.1/scriptcat-v1.0.1-chrome.crx)
 2. 点击以下链接安装脚本：
    ```
    https://raw.githubusercontent.com/hj01857655/Qoder/master/qoder.user.js
