@@ -1,0 +1,14 @@
+# 原始请求/响应落盘（含明文提示词），绝不入库
+dumps/
+
+# 运行日志（2MB ×3 轮转）
+request.log*
+
+# 本地密钥与配置（API_KEY 在此）
+.env
+
+# Python 缓存
+__pycache__/
+*.pyc
+credentials.json
+credentials.json.tmp

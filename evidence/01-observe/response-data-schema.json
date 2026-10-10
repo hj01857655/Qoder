@@ -1,0 +1,1695 @@
+{
+ "IssueResponse": {
+  "envelopeFn": "vQ",
+  "dataFn": "vr",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "id",
+   "projectId",
+   "title",
+   "contents",
+   "createdByProjectUserId",
+   "status",
+   "archivedAt",
+   "deletedAt",
+   "assigneeProjectUserId",
+   "assigneeProjectAgentId",
+   "workflowStatus",
+   "createdAt",
+   "updatedAt",
+   "projectAgentId",
+   "agentProfile",
+   "name",
+   "avatarUrl",
+   "projectUserId",
+   "userId",
+   "user",
+   "createdByUserId",
+   "emoji"
+  ],
+  "fields": {
+   "archivedAt": {
+    "path": [
+     "archivedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "assigneeAgent": {
+    "path": [
+     "assigneeAgent"
+    ],
+    "type": "object"
+   },
+   "assigneeAgent.agentProfile": {
+    "path": [
+     "assigneeAgent",
+     "agentProfile"
+    ]
+   },
+   "assigneeAgent.agentProfile.avatarUrl": {
+    "path": [
+     "assigneeAgent",
+     "agentProfile",
+     "avatarUrl"
+    ]
+   },
+   "assigneeAgent.agentProfile.id": {
+    "path": [
+     "assigneeAgent",
+     "agentProfile",
+     "id"
+    ]
+   },
+   "assigneeAgent.agentProfile.name": {
+    "path": [
+     "assigneeAgent",
+     "agentProfile",
+     "name"
+    ]
+   },
+   "assigneeAgent.projectAgentId": {
+    "path": [
+     "assigneeAgent",
+     "projectAgentId"
+    ]
+   },
+   "assigneeProjectAgentId": {
+    "path": [
+     "assigneeProjectAgentId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "assigneeProjectUserId": {
+    "path": [
+     "assigneeProjectUserId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "assigneeUser": {
+    "path": [
+     "assigneeUser"
+    ],
+    "type": "object"
+   },
+   "assigneeUser.projectUserId": {
+    "path": [
+     "assigneeUser",
+     "projectUserId"
+    ]
+   },
+   "assigneeUser.user": {
+    "path": [
+     "assigneeUser",
+     "user"
+    ]
+   },
+   "assigneeUser.userId": {
+    "path": [
+     "assigneeUser",
+     "userId"
+    ]
+   },
+   "contents": {
+    "path": [
+     "contents"
+    ]
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "createdByProjectUserId": {
+    "path": [
+     "createdByProjectUserId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "deletedAt": {
+    "path": [
+     "deletedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "labels": {
+    "path": [
+     "labels"
+    ],
+    "type": "array"
+   },
+   "priority": {
+    "path": [
+     "priority"
+    ]
+   },
+   "projectId": {
+    "path": [
+     "projectId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "reactions": {
+    "path": [
+     "reactions"
+    ],
+    "type": "array"
+   },
+   "status": {
+    "path": [
+     "status"
+    ],
+    "type": "string"
+   },
+   "title": {
+    "path": [
+     "title"
+    ],
+    "type": "string"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "workflowStatus": {
+    "path": [
+     "workflowStatus"
+    ],
+    "type": "string"
+   }
+  }
+ },
+ "AgentWorkspaceConfigResponse": {
+  "envelopeFn": "zC",
+  "dataFn": "ud",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "workspaces",
+   "version"
+  ],
+  "fields": {
+   "version": {
+    "path": [
+     "version"
+    ],
+    "type": "integer"
+   },
+   "workspaces": {
+    "path": [
+     "workspaces"
+    ]
+   }
+  }
+ },
+ "DiscussionInvitationAcceptanceResponse": {
+  "envelopeFn": "eQ",
+  "dataFn": "Ad",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "discussionId",
+   "member",
+   "id",
+   "userId",
+   "role",
+   "createdAt",
+   "updatedAt"
+  ],
+  "fields": {
+   "discussionId": {
+    "path": [
+     "discussionId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "member": {
+    "path": [
+     "member"
+    ]
+   },
+   "member.createdAt": {
+    "path": [
+     "member",
+     "createdAt"
+    ]
+   },
+   "member.id": {
+    "path": [
+     "member",
+     "id"
+    ]
+   },
+   "member.role": {
+    "path": [
+     "member",
+     "role"
+    ]
+   },
+   "member.updatedAt": {
+    "path": [
+     "member",
+     "updatedAt"
+    ]
+   },
+   "member.userId": {
+    "path": [
+     "member",
+     "userId"
+    ]
+   }
+  }
+ },
+ "DiscussionResponse": {
+  "envelopeFn": "rQ",
+  "dataFn": "Ei",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "id",
+   "title",
+   "description",
+   "status",
+   "createdByUserId",
+   "createdAt",
+   "updatedAt",
+   "issues",
+   "projectId",
+   "issueId"
+  ],
+  "fields": {
+   "archivedAt": {
+    "path": [
+     "archivedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "createdByUserId": {
+    "path": [
+     "createdByUserId"
+    ],
+    "type": "string"
+   },
+   "currentMemberRole": {
+    "path": [
+     "currentMemberRole"
+    ],
+    "type": "string"
+   },
+   "deletedAt": {
+    "path": [
+     "deletedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "description": {
+    "path": [
+     "description"
+    ],
+    "type": "string"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "issues": {
+    "path": [
+     "issues"
+    ],
+    "type": "array"
+   },
+   "lastMessageSeq": {
+    "path": [
+     "lastMessageSeq"
+    ]
+   },
+   "memberCapacity": {
+    "path": [
+     "memberCapacity"
+    ],
+    "type": "integer",
+    "format": "int32"
+   },
+   "projectId": {
+    "path": [
+     "projectId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "status": {
+    "path": [
+     "status"
+    ],
+    "type": "string"
+   },
+   "title": {
+    "path": [
+     "title"
+    ],
+    "type": "string"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   }
+  }
+ },
+ "DiscussionTeamAPIDiscussionTeamResponse": {
+  "envelopeFn": "iQ",
+  "dataFn": "Or",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "kind",
+   "id",
+   "discussionId",
+   "teamProfileId",
+   "configurationVersion",
+   "name",
+   "description",
+   "avatarUrl",
+   "leaderAgentProfileId",
+   "configuration",
+   "members",
+   "createdByUserId",
+   "createdAt",
+   "updatedAt",
+   "deletedAt",
+   "mode",
+   "agentProfileId",
+   "discussionAgentMemberId",
+   "role"
+  ],
+  "fields": {
+   "avatarUrl": {
+    "path": [
+     "avatarUrl"
+    ]
+   },
+   "configuration": {
+    "path": [
+     "configuration"
+    ]
+   },
+   "configuration.members": {
+    "path": [
+     "configuration",
+     "members"
+    ]
+   },
+   "configuration.mode": {
+    "path": [
+     "configuration",
+     "mode"
+    ]
+   },
+   "configurationVersion": {
+    "path": [
+     "configurationVersion"
+    ],
+    "type": "integer"
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "createdByUserId": {
+    "path": [
+     "createdByUserId"
+    ],
+    "type": "string"
+   },
+   "deletedAt": {
+    "path": [
+     "deletedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "description": {
+    "path": [
+     "description"
+    ],
+    "type": "string"
+   },
+   "discussionId": {
+    "path": [
+     "discussionId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "kind": {
+    "path": [
+     "kind"
+    ],
+    "type": "string"
+   },
+   "leaderAgentProfileId": {
+    "path": [
+     "leaderAgentProfileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "members": {
+    "path": [
+     "members"
+    ],
+    "type": "array"
+   },
+   "name": {
+    "path": [
+     "name"
+    ],
+    "type": "string"
+   },
+   "teamProfileId": {
+    "path": [
+     "teamProfileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   }
+  }
+ },
+ "MemberAPIAgentMemberResponse": {
+  "envelopeFn": "oQ",
+  "dataFn": "ti",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "kind",
+   "id",
+   "discussionId",
+   "agentProfileId",
+   "role",
+   "invocationPolicy",
+   "agentProfile",
+   "createdAt",
+   "updatedAt",
+   "invocationPolicyVersion",
+   "ownerUserId",
+   "type",
+   "name",
+   "description",
+   "avatarUrl",
+   "status"
+  ],
+  "fields": {
+   "agentProfile": {
+    "path": [
+     "agentProfile"
+    ]
+   },
+   "agentProfile.avatarUrl": {
+    "path": [
+     "agentProfile",
+     "avatarUrl"
+    ]
+   },
+   "agentProfile.description": {
+    "path": [
+     "agentProfile",
+     "description"
+    ]
+   },
+   "agentProfile.id": {
+    "path": [
+     "agentProfile",
+     "id"
+    ]
+   },
+   "agentProfile.invocationPolicy": {
+    "path": [
+     "agentProfile",
+     "invocationPolicy"
+    ]
+   },
+   "agentProfile.name": {
+    "path": [
+     "agentProfile",
+     "name"
+    ]
+   },
+   "agentProfile.ownerUserId": {
+    "path": [
+     "agentProfile",
+     "ownerUserId"
+    ]
+   },
+   "agentProfile.status": {
+    "path": [
+     "agentProfile",
+     "status"
+    ]
+   },
+   "agentProfile.type": {
+    "path": [
+     "agentProfile",
+     "type"
+    ]
+   },
+   "agentProfileId": {
+    "path": [
+     "agentProfileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "directMembership": {
+    "path": [
+     "directMembership"
+    ],
+    "type": "boolean"
+   },
+   "discussionId": {
+    "path": [
+     "discussionId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "invocationPolicy": {
+    "path": [
+     "invocationPolicy"
+    ],
+    "type": "string"
+   },
+   "invocationPolicyVersion": {
+    "path": [
+     "invocationPolicyVersion"
+    ],
+    "type": "integer"
+   },
+   "kind": {
+    "path": [
+     "kind"
+    ],
+    "type": "string"
+   },
+   "role": {
+    "path": [
+     "role"
+    ],
+    "type": "string"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   }
+  }
+ },
+ "MessageAPIMessageConfirmationResponse": {
+  "envelopeFn": "PQ",
+  "dataFn": "Jy",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "message",
+   "eventId",
+   "eventSeq",
+   "replayed"
+  ],
+  "fields": {
+   "eventId": {
+    "path": [
+     "eventId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "eventSeq": {
+    "path": [
+     "eventSeq"
+    ],
+    "type": "integer"
+   },
+   "message": {
+    "path": [
+     "message"
+    ]
+   },
+   "replayed": {
+    "path": [
+     "replayed"
+    ],
+    "type": "boolean"
+   }
+  }
+ },
+ "MessageAPIKeyMarkResponse": {
+  "envelopeFn": "RQ",
+  "dataFn": "sE",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "message",
+   "eventId",
+   "eventSeq",
+   "replayed"
+  ],
+  "fields": {
+   "eventId": {
+    "path": [
+     "eventId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "eventSeq": {
+    "path": [
+     "eventSeq"
+    ],
+    "type": "integer"
+   },
+   "message": {
+    "path": [
+     "message"
+    ]
+   },
+   "replayed": {
+    "path": [
+     "replayed"
+    ],
+    "type": "boolean"
+   }
+  }
+ },
+ "MessageAPIReactionResponse": {
+  "envelopeFn": "UQ",
+  "dataFn": "WQ",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "message",
+   "eventId",
+   "eventSeq"
+  ],
+  "fields": {
+   "eventId": {
+    "path": [
+     "eventId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "eventSeq": {
+    "path": [
+     "eventSeq"
+    ],
+    "type": "integer"
+   },
+   "message": {
+    "path": [
+     "message"
+    ]
+   }
+  }
+ },
+ "FileCreatedResponse": {
+  "envelopeFn": "MQ",
+  "dataFn": "WA",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "scanStatus",
+   "scanReason",
+   "riskLevel",
+   "fileId",
+   "status",
+   "upload",
+   "method",
+   "url",
+   "headers",
+   "expiresAt"
+  ],
+  "fields": {
+   "fileId": {
+    "path": [
+     "fileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "riskLevel": {
+    "path": [
+     "riskLevel"
+    ],
+    "type": "string"
+   },
+   "scanReason": {
+    "path": [
+     "scanReason"
+    ],
+    "type": "string"
+   },
+   "scanStatus": {
+    "path": [
+     "scanStatus"
+    ],
+    "type": "string"
+   },
+   "status": {
+    "path": [
+     "status"
+    ],
+    "type": "string"
+   },
+   "upload": {
+    "path": [
+     "upload"
+    ]
+   },
+   "upload.expiresAt": {
+    "path": [
+     "upload",
+     "expiresAt"
+    ]
+   },
+   "upload.headers": {
+    "path": [
+     "upload",
+     "headers"
+    ]
+   },
+   "upload.method": {
+    "path": [
+     "upload",
+     "method"
+    ]
+   },
+   "upload.url": {
+    "path": [
+     "upload",
+     "url"
+    ]
+   },
+   "pending": {
+    "path": [
+     "pending"
+    ]
+   },
+   "completed": {
+    "path": [
+     "completed"
+    ]
+   },
+   "available": {
+    "path": [
+     "available"
+    ]
+   }
+  }
+ },
+ "NotificationResponse": {
+  "envelopeFn": "hQ",
+  "dataFn": "cd",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "items",
+   "limit",
+   "nextCursor",
+   "hasMore",
+   "asOf",
+   "coverage",
+   "discussionMemberEventsFrom"
+  ],
+  "fields": {
+   "asOf": {
+    "path": [
+     "asOf"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "coverage": {
+    "path": [
+     "coverage"
+    ],
+    "type": "object"
+   },
+   "coverage.discussionMemberEventsFrom": {
+    "path": [
+     "coverage",
+     "discussionMemberEventsFrom"
+    ]
+   },
+   "hasMore": {
+    "path": [
+     "hasMore"
+    ],
+    "type": "boolean"
+   },
+   "items": {
+    "path": [
+     "items"
+    ],
+    "type": "array"
+   },
+   "limit": {
+    "path": [
+     "limit"
+    ],
+    "type": "integer"
+   },
+   "nextCursor": {
+    "path": [
+     "nextCursor"
+    ],
+    "type": "string"
+   }
+  }
+ },
+ "ProjectResponse": {
+  "envelopeFn": "kQ",
+  "dataFn": "gi",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "id",
+   "name",
+   "description",
+   "status",
+   "createdByUserId",
+   "createdAt",
+   "updatedAt",
+   "ownerProjectUserId",
+   "version"
+  ],
+  "fields": {
+   "archivedAt": {
+    "path": [
+     "archivedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "config": {
+    "path": [
+     "config"
+    ]
+   },
+   "config.coverIconId": {
+    "path": [
+     "config",
+     "coverIconId"
+    ]
+   },
+   "config.coverPath": {
+    "path": [
+     "config",
+     "coverPath"
+    ]
+   },
+   "config.identifier": {
+    "path": [
+     "config",
+     "identifier"
+    ]
+   },
+   "config.localFolderPath": {
+    "path": [
+     "config",
+     "localFolderPath"
+    ]
+   },
+   "config.repositoryUrl": {
+    "path": [
+     "config",
+     "repositoryUrl"
+    ]
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "createdByUserId": {
+    "path": [
+     "createdByUserId"
+    ],
+    "type": "string"
+   },
+   "deletedAt": {
+    "path": [
+     "deletedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "description": {
+    "path": [
+     "description"
+    ],
+    "type": "string"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "memberCapacity": {
+    "path": [
+     "memberCapacity"
+    ],
+    "type": "integer",
+    "format": "int32"
+   },
+   "name": {
+    "path": [
+     "name"
+    ],
+    "type": "string"
+   },
+   "ownerProjectUserId": {
+    "path": [
+     "ownerProjectUserId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "status": {
+    "path": [
+     "status"
+    ],
+    "type": "string"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "version": {
+    "path": [
+     "version"
+    ]
+   }
+  }
+ },
+ "ProjectTeamAPIProjectTeamResponse": {
+  "envelopeFn": "IQ",
+  "dataFn": "Zr",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "kind",
+   "id",
+   "projectId",
+   "teamProfileId",
+   "configurationVersion",
+   "name",
+   "description",
+   "avatarUrl",
+   "leaderAgentProfileId",
+   "configuration",
+   "members",
+   "createdByUserId",
+   "createdAt",
+   "updatedAt",
+   "deletedAt",
+   "mode",
+   "agentProfileId",
+   "projectAgentMemberId",
+   "role"
+  ],
+  "fields": {
+   "avatarUrl": {
+    "path": [
+     "avatarUrl"
+    ]
+   },
+   "configuration": {
+    "path": [
+     "configuration"
+    ]
+   },
+   "configuration.members": {
+    "path": [
+     "configuration",
+     "members"
+    ]
+   },
+   "configuration.mode": {
+    "path": [
+     "configuration",
+     "mode"
+    ]
+   },
+   "configurationVersion": {
+    "path": [
+     "configurationVersion"
+    ],
+    "type": "integer"
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "createdByUserId": {
+    "path": [
+     "createdByUserId"
+    ],
+    "type": "string"
+   },
+   "deletedAt": {
+    "path": [
+     "deletedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "description": {
+    "path": [
+     "description"
+    ],
+    "type": "string"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "kind": {
+    "path": [
+     "kind"
+    ],
+    "type": "string"
+   },
+   "leaderAgentProfileId": {
+    "path": [
+     "leaderAgentProfileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "members": {
+    "path": [
+     "members"
+    ],
+    "type": "array"
+   },
+   "name": {
+    "path": [
+     "name"
+    ],
+    "type": "string"
+   },
+   "projectId": {
+    "path": [
+     "projectId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "teamProfileId": {
+    "path": [
+     "teamProfileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   }
+  }
+ },
+ "RuntimeAgentWorkspacesResponse": {
+  "envelopeFn": "EQ",
+  "dataFn": "nE",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "discussionId",
+   "memberId",
+   "agentProfileId",
+   "agentProfile",
+   "discussionAgent"
+  ],
+  "fields": {
+   "agentProfile": {
+    "path": [
+     "agentProfile"
+    ]
+   },
+   "agentProfileId": {
+    "path": [
+     "agentProfileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "discussionAgent": {
+    "path": [
+     "discussionAgent"
+    ]
+   },
+   "discussionId": {
+    "path": [
+     "discussionId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "memberId": {
+    "path": [
+     "memberId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   }
+  }
+ },
+ "RuntimeMessageResponse": {
+  "envelopeFn": "yQ",
+  "dataFn": "Qr",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "id",
+   "discussionId",
+   "clientMessageId",
+   "seq",
+   "version",
+   "type",
+   "sender",
+   "contents",
+   "mentions",
+   "replyToMessageId",
+   "createdAt",
+   "updatedAt",
+   "deletedAt",
+   "text",
+   "fileId",
+   "fileType",
+   "kind",
+   "memberId",
+   "discussionTeamId",
+   "emoji",
+   "userId",
+   "teamProfileId",
+   "configurationVersion"
+  ],
+  "fields": {
+   "clientMessageId": {
+    "path": [
+     "clientMessageId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "contents": {
+    "path": [
+     "contents"
+    ],
+    "type": "array"
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "deletedAt": {
+    "path": [
+     "deletedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "discussionId": {
+    "path": [
+     "discussionId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "mentions": {
+    "path": [
+     "mentions"
+    ],
+    "type": "array"
+   },
+   "reactions": {
+    "path": [
+     "reactions"
+    ],
+    "type": "array"
+   },
+   "replyToMessageId": {
+    "path": [
+     "replyToMessageId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "sender": {
+    "path": [
+     "sender"
+    ]
+   },
+   "seq": {
+    "path": [
+     "seq"
+    ],
+    "type": "integer"
+   },
+   "teamContext": {
+    "path": [
+     "teamContext"
+    ]
+   },
+   "teamContext.configurationVersion": {
+    "path": [
+     "teamContext",
+     "configurationVersion"
+    ]
+   },
+   "teamContext.discussionTeamId": {
+    "path": [
+     "teamContext",
+     "discussionTeamId"
+    ]
+   },
+   "teamContext.teamProfileId": {
+    "path": [
+     "teamContext",
+     "teamProfileId"
+    ]
+   },
+   "type": {
+    "path": [
+     "type"
+    ],
+    "type": "string"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "version": {
+    "path": [
+     "version"
+    ],
+    "type": "integer"
+   }
+  }
+ },
+ "TeamAPITeamProfilePageResponse": {
+  "envelopeFn": "QQ",
+  "dataFn": "Nf",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "items",
+   "limit",
+   "offset"
+  ],
+  "fields": {
+   "items": {
+    "path": [
+     "items"
+    ],
+    "type": "array"
+   },
+   "limit": {
+    "path": [
+     "limit"
+    ],
+    "type": "integer"
+   },
+   "offset": {
+    "path": [
+     "offset"
+    ],
+    "type": "integer"
+   }
+  }
+ },
+ "TeamAPITeamProfileResponse": {
+  "envelopeFn": "BQ",
+  "dataFn": "Fs",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "id",
+   "ownerUserId",
+   "name",
+   "description",
+   "avatarUrl",
+   "leaderAgentProfileId",
+   "configuration",
+   "configurationVersion",
+   "invocationPolicy",
+   "invocationPolicyVersion",
+   "createdAt",
+   "updatedAt",
+   "deletedAt",
+   "mode",
+   "members",
+   "agentProfileId"
+  ],
+  "fields": {
+   "avatarUrl": {
+    "path": [
+     "avatarUrl"
+    ]
+   },
+   "configuration": {
+    "path": [
+     "configuration"
+    ]
+   },
+   "configuration.members": {
+    "path": [
+     "configuration",
+     "members"
+    ]
+   },
+   "configuration.mode": {
+    "path": [
+     "configuration",
+     "mode"
+    ]
+   },
+   "configurationVersion": {
+    "path": [
+     "configurationVersion"
+    ],
+    "type": "integer"
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "deletedAt": {
+    "path": [
+     "deletedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "description": {
+    "path": [
+     "description"
+    ],
+    "type": "string"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "invocationPolicy": {
+    "path": [
+     "invocationPolicy"
+    ],
+    "type": "string"
+   },
+   "invocationPolicyVersion": {
+    "path": [
+     "invocationPolicyVersion"
+    ],
+    "type": "integer"
+   },
+   "leaderAgentProfileId": {
+    "path": [
+     "leaderAgentProfileId"
+    ],
+    "type": "string",
+    "format": "uuid"
+   },
+   "name": {
+    "path": [
+     "name"
+    ],
+    "type": "string"
+   },
+   "ownerUserId": {
+    "path": [
+     "ownerUserId"
+    ],
+    "type": "string"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   }
+  }
+ },
+ "UserResponse": {
+  "envelopeFn": "Dy",
+  "dataFn": "Bc",
+  "envelopeFields": [
+   "code",
+   "message",
+   "success",
+   "data",
+   "requestId"
+  ],
+  "required": [
+   "id",
+   "nickname",
+   "displayName",
+   "avatarUrl",
+   "createdAt",
+   "updatedAt",
+   "orgId"
+  ],
+  "fields": {
+   "avatarUrl": {
+    "path": [
+     "avatarUrl"
+    ],
+    "type": "string",
+    "format": "uri"
+   },
+   "createdAt": {
+    "path": [
+     "createdAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   },
+   "displayName": {
+    "path": [
+     "displayName"
+    ],
+    "type": "string"
+   },
+   "id": {
+    "path": [
+     "id"
+    ],
+    "type": "string"
+   },
+   "nickname": {
+    "path": [
+     "nickname"
+    ]
+   },
+   "orgId": {
+    "path": [
+     "orgId"
+    ],
+    "type": "string"
+   },
+   "updatedAt": {
+    "path": [
+     "updatedAt"
+    ],
+    "type": "string",
+    "format": "date-time"
+   }
+  }
+ }
+}

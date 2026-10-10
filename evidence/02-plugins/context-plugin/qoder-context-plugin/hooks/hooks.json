@@ -1,0 +1,49 @@
+{
+  "description": "Qoder Context project knowledge overview hooks",
+  "hooks": {
+    "SessionStart": [
+      {
+        "async": false,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd.exe",
+            "args": [
+              "/d",
+              "/c",
+              "${QODER_PLUGIN_ROOT}/bin/qoder-context.cmd",
+              "qoder-context-prompt"
+            ],
+            "name": "qoder-context-knowledge-overview",
+            "timeout": 2,
+            "env": {
+              "QODER_PRODUCT_ID": "qoder-cn"
+            }
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "async": false,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd.exe",
+            "args": [
+              "/d",
+              "/c",
+              "${QODER_PLUGIN_ROOT}/bin/qoder-context.cmd",
+              "user-prompt-submit"
+            ],
+            "name": "qoder-context-user-prompt-submit",
+            "timeout": 2,
+            "env": {
+              "QODER_PRODUCT_ID": "qoder-cn"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

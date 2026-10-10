@@ -1,0 +1,1451 @@
+[
+ {
+  "name": "setIssueReaction",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/reactions",
+  "method": "PATCH",
+  "bodySchema": "SetIssueReaction",
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueResponse"
+  ]
+ },
+ {
+  "name": "queryAgentMemberships",
+  "path": "/api/v1/collaboration/agent-memberships/query",
+  "method": "POST",
+  "bodySchema": "AgentMembershipQuery",
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentMembershipQueryResponse"
+  ]
+ },
+ {
+  "name": "getCurrentAgentProfile",
+  "path": "/api/v1/collaboration/agent-profiles/current",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=CurrentAgentProfileResponse"
+  ]
+ },
+ {
+  "name": "ensureCurrentAgentProfile",
+  "path": "/api/v1/collaboration/agent-profiles/current",
+  "method": "PUT",
+  "bodySchema": "EnsureCurrentAgentProfile",
+  "requiredHeaders": "",
+  "responses": [
+   "200=CurrentAgentProfileResponse",
+   "201=CurrentAgentProfileResponse"
+  ]
+ },
+ {
+  "name": "getAgentProfileAvatar",
+  "path": "/api/v1/collaboration/agent-profiles/{profileId}/avatar",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentAvatarResponse"
+  ]
+ },
+ {
+  "name": "replaceAgentProfileAvatar",
+  "path": "/api/v1/collaboration/agent-profiles/{profileId}/avatar",
+  "method": "PUT",
+  "bodySchema": "ReplaceAgentAvatarRequest",
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentAvatarResponse"
+  ]
+ },
+ {
+  "name": "updateAgentProfileInvocationPolicy",
+  "path": "/api/v1/collaboration/agent-profiles/{profileId}/invocation-policy",
+  "method": "PATCH",
+  "bodySchema": "ProfileInvocationPolicyUpdate",
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentProfilePolicyResponse"
+  ]
+ },
+ {
+  "name": "getAgentProfileWorkspaces",
+  "path": "/api/v1/collaboration/agent-profiles/{profileId}/workspaces",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentWorkspaceConfigResponse"
+  ]
+ },
+ {
+  "name": "replaceAgentProfileWorkspaces",
+  "path": "/api/v1/collaboration/agent-profiles/{profileId}/workspaces",
+  "method": "PUT",
+  "bodySchema": "ReplaceAgentWorkspaces",
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentWorkspaceConfigResponse"
+  ]
+ },
+ {
+  "name": "uploadAvatar",
+  "path": "/api/v1/collaboration/avatars",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "201=AvatarUploadedResponse"
+  ]
+ },
+ {
+  "name": "connectUnifiedCollaboration",
+  "path": "/api/v1/collaboration/connections",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "\"Sec-WebSocket-Protocol\"",
+  "responses": []
+ },
+ {
+  "name": "acceptDiscussionInvitation",
+  "path": "/api/v1/collaboration/discussion-invitations/accept",
+  "method": "POST",
+  "bodySchema": "AcceptDiscussionInvitation",
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionInvitationAcceptanceResponse"
+  ]
+ },
+ {
+  "name": "listDiscussions",
+  "path": "/api/v1/collaboration/discussions",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionPage"
+  ]
+ },
+ {
+  "name": "createDiscussion",
+  "path": "/api/v1/collaboration/discussions",
+  "method": "POST",
+  "bodySchema": "CreateDiscussion",
+  "requiredHeaders": "",
+  "responses": [
+   "201=DiscussionResponse"
+  ]
+ },
+ {
+  "name": "getDiscussion",
+  "path": "/api/v1/collaboration/discussions/{id}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionResponse"
+  ]
+ },
+ {
+  "name": "updateDiscussion",
+  "path": "/api/v1/collaboration/discussions/{id}",
+  "method": "PATCH",
+  "bodySchema": "PatchDiscussion",
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionResponse"
+  ]
+ },
+ {
+  "name": "deleteDiscussion",
+  "path": "/api/v1/collaboration/discussions/{id}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listDiscussionAgentExecutions",
+  "path": "/api/v1/collaboration/discussions/{id}/agent-executions",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "getDiscussionAgentWorkspaces",
+  "path": "/api/v1/collaboration/discussions/{id}/agents/{memberId}/workspaces",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentWorkspaceConfigResponse"
+  ]
+ },
+ {
+  "name": "replaceDiscussionAgentWorkspaces",
+  "path": "/api/v1/collaboration/discussions/{id}/agents/{memberId}/workspaces",
+  "method": "PUT",
+  "bodySchema": "ReplaceAgentWorkspaces",
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentWorkspaceConfigResponse"
+  ]
+ },
+ {
+  "name": "listDiscussionEvents",
+  "path": "/api/v1/collaboration/discussions/{id}/events",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIDiscussionEventPage"
+  ]
+ },
+ {
+  "name": "getDiscussionInvitationSettings",
+  "path": "/api/v1/collaboration/discussions/{id}/invitation-settings",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionInvitationSettingsResponse"
+  ]
+ },
+ {
+  "name": "updateDiscussionInvitationSettings",
+  "path": "/api/v1/collaboration/discussions/{id}/invitation-settings",
+  "method": "PATCH",
+  "bodySchema": "UpdateDiscussionInvitationSettings",
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionInvitationSettingsResponse"
+  ]
+ },
+ {
+  "name": "createDiscussionInvitation",
+  "path": "/api/v1/collaboration/discussions/{id}/invitations",
+  "method": "POST",
+  "bodySchema": "CreateDiscussionInvitation",
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionInvitationResponse",
+   "201=DiscussionInvitationResponse"
+  ]
+ },
+ {
+  "name": "revokeDiscussionInvitation",
+  "path": "/api/v1/collaboration/discussions/{id}/invitations/{invitationId}/revoke",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionInvitationResponse"
+  ]
+ },
+ {
+  "name": "listDiscussionIssueLinks",
+  "path": "/api/v1/collaboration/discussions/{id}/issue-links",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionIssueLinksResponse"
+  ]
+ },
+ {
+  "name": "addDiscussionIssueLink",
+  "path": "/api/v1/collaboration/discussions/{id}/issue-links/{projectId}/{issueId}",
+  "method": "PUT",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "removeDiscussionIssueLink",
+  "path": "/api/v1/collaboration/discussions/{id}/issue-links/{projectId}/{issueId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listDiscussionKeyMessages",
+  "path": "/api/v1/collaboration/discussions/{id}/key-messages",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIKeyMessagePage"
+  ]
+ },
+ {
+  "name": "queryDiscussionMemberPresences",
+  "path": "/api/v1/collaboration/discussions/{id}/member-presences/query",
+  "method": "POST",
+  "bodySchema": "MemberAPIPresenceInput",
+  "requiredHeaders": "",
+  "responses": [
+   "200=MemberAPIPresenceResponse"
+  ]
+ },
+ {
+  "name": "listDiscussionMembers",
+  "path": "/api/v1/collaboration/discussions/{id}/members",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MemberAPIDiscussionMemberPage"
+  ]
+ },
+ {
+  "name": "addDiscussionMember",
+  "path": "/api/v1/collaboration/discussions/{id}/members",
+  "method": "POST",
+  "bodySchema": "MemberAPIAddDiscussionMember",
+  "requiredHeaders": "",
+  "responses": [
+   "201=MemberAPIDiscussionMemberResponse"
+  ]
+ },
+ {
+  "name": "removeDiscussionHumanMember",
+  "path": "/api/v1/collaboration/discussions/{id}/members/human/{memberId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "getDiscussionTeam",
+  "path": "/api/v1/collaboration/discussions/{id}/members/team/{discussionTeamId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionTeamAPIDiscussionTeamResponse"
+  ]
+ },
+ {
+  "name": "removeDiscussionTeam",
+  "path": "/api/v1/collaboration/discussions/{id}/members/team/{discussionTeamId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "getDiscussionMember",
+  "path": "/api/v1/collaboration/discussions/{id}/members/{kind}/{memberId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MemberAPIDiscussionMemberResponse"
+  ]
+ },
+ {
+  "name": "removeDiscussionAgentMember",
+  "path": "/api/v1/collaboration/discussions/{id}/members/{kind}/{memberId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "checkDiscussionAgentInvocation",
+  "path": "/api/v1/collaboration/discussions/{id}/members/{kind}/{memberId}/invocation-check",
+  "method": "POST",
+  "bodySchema": "InvocationCheckInput",
+  "requiredHeaders": "",
+  "responses": [
+   "200=InvocationDecisionResponse"
+  ]
+ },
+ {
+  "name": "updateDiscussionAgentInvocationPolicy",
+  "path": "/api/v1/collaboration/discussions/{id}/members/{kind}/{memberId}/invocation-policy",
+  "method": "PATCH",
+  "bodySchema": "DiscussionInvocationPolicyUpdate",
+  "requiredHeaders": "",
+  "responses": [
+   "200=MemberAPIAgentMemberResponse"
+  ]
+ },
+ {
+  "name": "listDiscussionMessages",
+  "path": "/api/v1/collaboration/discussions/{id}/messages",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIMessageHistoryPage"
+  ]
+ },
+ {
+  "name": "sendDiscussionMessage",
+  "path": "/api/v1/collaboration/discussions/{id}/messages",
+  "method": "POST",
+  "bodySchema": "MessageAPISendMessage",
+  "requiredHeaders": "",
+  "responses": [
+   "201=MessageAPIMessageConfirmationResponse"
+  ]
+ },
+ {
+  "name": "queryDiscussionMessages",
+  "path": "/api/v1/collaboration/discussions/{id}/messages/query",
+  "method": "POST",
+  "bodySchema": "MessageAPIQueryMessages",
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIQueryMessagesResponse"
+  ]
+ },
+ {
+  "name": "setDiscussionMessageKeyMark",
+  "path": "/api/v1/collaboration/discussions/{id}/messages/{messageId}/key-mark",
+  "method": "PATCH",
+  "bodySchema": "MessageAPIKeyMarkBody",
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIKeyMarkResponse"
+  ]
+ },
+ {
+  "name": "setDiscussionMessageReaction",
+  "path": "/api/v1/collaboration/discussions/{id}/messages/{messageId}/reactions",
+  "method": "PATCH",
+  "bodySchema": "MessageAPIReactionBody",
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIReactionResponse"
+  ]
+ },
+ {
+  "name": "getDiscussionShareAccess",
+  "path": "/api/v1/collaboration/discussions/{id}/share-access",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionShareAccessResponse"
+  ]
+ },
+ {
+  "name": "createDiscussionShareInvitation",
+  "path": "/api/v1/collaboration/discussions/{id}/share-invitations",
+  "method": "POST",
+  "bodySchema": "CreateDiscussionInvitation",
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionInvitationResponse",
+   "201=DiscussionInvitationResponse"
+  ]
+ },
+ {
+  "name": "getDiscussionMessageSnapshot",
+  "path": "/api/v1/collaboration/discussions/{id}/snapshot",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIMessageSnapshotPage"
+  ]
+ },
+ {
+  "name": "listDiscussionSources",
+  "path": "/api/v1/collaboration/discussions/{id}/sources",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIDiscussionSourcePage"
+  ]
+ },
+ {
+  "name": "connectDiscussionEvents",
+  "path": "/api/v1/collaboration/events",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "\"Sec-WebSocket-Protocol\"",
+  "responses": []
+ },
+ {
+  "name": "createFile",
+  "path": "/api/v1/collaboration/files",
+  "method": "POST",
+  "bodySchema": "CreateFileRequest",
+  "requiredHeaders": "",
+  "responses": [
+   "200=FileCreatedResponse",
+   "201=FileCreatedResponse"
+  ]
+ },
+ {
+  "name": "getFile",
+  "path": "/api/v1/collaboration/files/{fileId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=FileMetadataResponse"
+  ]
+ },
+ {
+  "name": "completeFile",
+  "path": "/api/v1/collaboration/files/{fileId}/complete",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=FileStatusResponse"
+  ]
+ },
+ {
+  "name": "authorizeFileDownload",
+  "path": "/api/v1/collaboration/files/{fileId}/download-authorizations",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=FileDownloadResponse"
+  ]
+ },
+ {
+  "name": "listMyCollaborationNotifications",
+  "path": "/api/v1/collaboration/me/notifications",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=NotificationResponse"
+  ]
+ },
+ {
+  "name": "connectDesktopAccountPresence",
+  "path": "/api/v1/collaboration/presence-connections",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "acceptProjectInvitation",
+  "path": "/api/v1/collaboration/project-invitations/accept",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "previewProjectInvitation",
+  "path": "/api/v1/collaboration/project-invitations/preview",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listProjects",
+  "path": "/api/v1/collaboration/projects",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectPage"
+  ]
+ },
+ {
+  "name": "createProject",
+  "path": "/api/v1/collaboration/projects",
+  "method": "POST",
+  "bodySchema": "CreateProject",
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": [
+   "201=ProjectResponse"
+  ]
+ },
+ {
+  "name": "getProject",
+  "path": "/api/v1/collaboration/projects/{id}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectResponse"
+  ]
+ },
+ {
+  "name": "updateProject",
+  "path": "/api/v1/collaboration/projects/{id}",
+  "method": "PATCH",
+  "bodySchema": "PatchProject",
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": [
+   "200=ProjectResponse"
+  ]
+ },
+ {
+  "name": "deleteProject",
+  "path": "/api/v1/collaboration/projects/{id}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "getProjectAgentWorkspaces",
+  "path": "/api/v1/collaboration/projects/{id}/agents/{memberId}/workspaces",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentWorkspaceConfigResponse"
+  ]
+ },
+ {
+  "name": "replaceProjectAgentWorkspaces",
+  "path": "/api/v1/collaboration/projects/{id}/agents/{memberId}/workspaces",
+  "method": "PUT",
+  "bodySchema": "ReplaceAgentWorkspaces",
+  "requiredHeaders": "",
+  "responses": [
+   "200=AgentWorkspaceConfigResponse"
+  ]
+ },
+ {
+  "name": "getProjectInvitationSettings",
+  "path": "/api/v1/collaboration/projects/{id}/invitation-settings",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectInvitationSettingsResponse"
+  ]
+ },
+ {
+  "name": "updateProjectInvitationSettings",
+  "path": "/api/v1/collaboration/projects/{id}/invitation-settings",
+  "method": "PATCH",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectInvitationSettingsResponse"
+  ]
+ },
+ {
+  "name": "createProjectInvitation",
+  "path": "/api/v1/collaboration/projects/{id}/invitations",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "leaveProject",
+  "path": "/api/v1/collaboration/projects/{id}/leave",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "listProjectMembers",
+  "path": "/api/v1/collaboration/projects/{id}/members",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectMemberPageResponse"
+  ]
+ },
+ {
+  "name": "joinProjectAgent",
+  "path": "/api/v1/collaboration/projects/{id}/members/agent",
+  "method": "POST",
+  "bodySchema": "ProjectAgentJoin",
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": [
+   "200=ProjectAgentMembershipResponse",
+   "201=ProjectAgentMembershipResponse"
+  ]
+ },
+ {
+  "name": "removeProjectAgentMember",
+  "path": "/api/v1/collaboration/projects/{id}/members/agent/{memberId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "getProjectAgentInvocationPolicy",
+  "path": "/api/v1/collaboration/projects/{id}/members/agent/{memberId}/invocation-policy",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectAgentPolicyResponse"
+  ]
+ },
+ {
+  "name": "updateProjectAgentInvocationPolicy",
+  "path": "/api/v1/collaboration/projects/{id}/members/agent/{memberId}/invocation-policy",
+  "method": "PATCH",
+  "bodySchema": "ProjectInvocationPolicyUpdate",
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectAgentPolicyResponse"
+  ]
+ },
+ {
+  "name": "removeProjectHumanMember",
+  "path": "/api/v1/collaboration/projects/{id}/members/human/{memberId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "listProjectTeams",
+  "path": "/api/v1/collaboration/projects/{id}/members/team",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectTeamAPIPageResponse"
+  ]
+ },
+ {
+  "name": "createProjectTeam",
+  "path": "/api/v1/collaboration/projects/{id}/members/team",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": [
+   "200=ProjectTeamAPIProjectTeamResponse",
+   "201=ProjectTeamAPIProjectTeamResponse"
+  ]
+ },
+ {
+  "name": "getProjectTeam",
+  "path": "/api/v1/collaboration/projects/{id}/members/team/{projectTeamId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectTeamAPIProjectTeamResponse"
+  ]
+ },
+ {
+  "name": "removeProjectTeam",
+  "path": "/api/v1/collaboration/projects/{id}/members/team/{projectTeamId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "listIssues",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssuePage"
+  ]
+ },
+ {
+  "name": "createIssue",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues",
+  "method": "POST",
+  "bodySchema": "CreateIssue",
+  "requiredHeaders": "",
+  "responses": [
+   "201=IssueResponse"
+  ]
+ },
+ {
+  "name": "getIssue",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueResponse"
+  ]
+ },
+ {
+  "name": "updateIssue",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}",
+  "method": "PATCH",
+  "bodySchema": "PatchIssue",
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueResponse"
+  ]
+ },
+ {
+  "name": "deleteIssue",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "getIssueAgentAssignment",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/agent-assignment",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "clearIssueAgentAssignment",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/agent-assignment",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": []
+ },
+ {
+  "name": "assignIssueAgent",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/agent-executions",
+  "method": "POST",
+  "bodySchema": "AssignIssueAgent",
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": []
+ },
+ {
+  "name": "listIssueComments",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/comments",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "createIssueComment",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/comments",
+  "method": "POST",
+  "bodySchema": "IssueCommentCreateBody",
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": []
+ },
+ {
+  "name": "getIssueComment",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/comments/{commentId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "updateIssueComment",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/comments/{commentId}",
+  "method": "PATCH",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "deleteIssueComment",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/comments/{commentId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "listIssueDiscussions",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/discussions",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionPage"
+  ]
+ },
+ {
+  "name": "listIssueEvents",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/events",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listIssueExecutionStates",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/execution-states",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listIssueLabels",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/labels",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueLabelList"
+  ]
+ },
+ {
+  "name": "bindIssueLabel",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/labels/{labelId}",
+  "method": "PUT",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "unbindIssueLabel",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/labels/{labelId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "setIssueReaction",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/reactions",
+  "method": "PATCH",
+  "bodySchema": "SetIssueReaction",
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueResponse"
+  ]
+ },
+ {
+  "name": "getIssueTimeline",
+  "path": "/api/v1/collaboration/projects/{projectId}/issues/{issueId}/timeline",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listProjectLabels",
+  "path": "/api/v1/collaboration/projects/{projectId}/labels",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectLabelPage"
+  ]
+ },
+ {
+  "name": "createProjectLabel",
+  "path": "/api/v1/collaboration/projects/{projectId}/labels",
+  "method": "POST",
+  "bodySchema": "CreateProjectLabel",
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectLabelResponse"
+  ]
+ },
+ {
+  "name": "connectCurrentRuntime",
+  "path": "/api/v1/collaboration/runtime/connections",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "runtimeOwnerCreateDiscussion",
+  "path": "/api/v1/collaboration/runtime/discussions",
+  "method": "POST",
+  "bodySchema": "CreateDiscussion",
+  "requiredHeaders": "",
+  "responses": [
+   "201=DiscussionResponse"
+  ]
+ },
+ {
+  "name": "getRuntimeDiscussion",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionResponse"
+  ]
+ },
+ {
+  "name": "runtimeOwnerUpdateDiscussion",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}",
+  "method": "PATCH",
+  "bodySchema": "PatchDiscussion",
+  "requiredHeaders": "",
+  "responses": [
+   "200=DiscussionResponse"
+  ]
+ },
+ {
+  "name": "runtimeOwnerListDiscussionAgentExecutions",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/agent-executions",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "reportDiscussionAgentExecution",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/agent-executions",
+  "method": "PUT",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "getAgentInbox",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/agent-inbox-confirmation",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "confirmAgentInbox",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/agent-inbox-confirmation",
+  "method": "PUT",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "sendDiscussionAgentMessage",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/agent-messages",
+  "method": "POST",
+  "bodySchema": "MessageAPISendAgentMessage",
+  "requiredHeaders": "",
+  "responses": [
+   "201=MessageAPIMessageConfirmationResponse"
+  ]
+ },
+ {
+  "name": "getRuntimeAgentWorkspaces",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/agent-workspaces",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=RuntimeAgentWorkspacesResponse"
+  ]
+ },
+ {
+  "name": "createRuntimeFile",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/files",
+  "method": "POST",
+  "bodySchema": "RuntimeCreateFileRequest",
+  "requiredHeaders": "",
+  "responses": [
+   "200=FileCreatedResponse",
+   "201=FileCreatedResponse"
+  ]
+ },
+ {
+  "name": "getRuntimeFile",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/files/{fileId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=FileMetadataResponse"
+  ]
+ },
+ {
+  "name": "completeRuntimeFile",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/files/{fileId}/complete",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=FileStatusResponse"
+  ]
+ },
+ {
+  "name": "listRuntimeDiscussionMessages",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/messages",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=MessageAPIMessageHistoryPage"
+  ]
+ },
+ {
+  "name": "getRuntimeDiscussionMessage",
+  "path": "/api/v1/collaboration/runtime/discussions/{id}/messages/{messageId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=RuntimeMessageResponse"
+  ]
+ },
+ {
+  "name": "listRuntimeIssueExecutions",
+  "path": "/api/v1/collaboration/runtime/issue-executions",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "getRuntimeIssue",
+  "path": "/api/v1/collaboration/runtime/issues/{issueId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueResponse"
+  ]
+ },
+ {
+  "name": "getRuntimeIssueAgentWorkspaces",
+  "path": "/api/v1/collaboration/runtime/issues/{issueId}/agent-workspaces",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listRuntimeIssueComments",
+  "path": "/api/v1/collaboration/runtime/issues/{issueId}/comments",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "publishRuntimeIssueComment",
+  "path": "/api/v1/collaboration/runtime/issues/{issueId}/comments",
+  "method": "POST",
+  "bodySchema": "RuntimeIssueCommentCreateBody",
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": []
+ },
+ {
+  "name": "getRuntimeIssueComment",
+  "path": "/api/v1/collaboration/runtime/issues/{issueId}/comments/{commentId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "reportIssueExecutionState",
+  "path": "/api/v1/collaboration/runtime/issues/{issueId}/execution-states",
+  "method": "PUT",
+  "bodySchema": "ReportIssueExecution",
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "listRuntimeProjects",
+  "path": "/api/v1/collaboration/runtime/projects",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=RuntimeProjectPage"
+  ]
+ },
+ {
+  "name": "runtimeOwnerCreateProject",
+  "path": "/api/v1/collaboration/runtime/projects",
+  "method": "POST",
+  "bodySchema": "CreateProject",
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": [
+   "201=ProjectResponse"
+  ]
+ },
+ {
+  "name": "getRuntimeProject",
+  "path": "/api/v1/collaboration/runtime/projects/{id}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=ProjectResponse"
+  ]
+ },
+ {
+  "name": "runtimeOwnerUpdateProject",
+  "path": "/api/v1/collaboration/runtime/projects/{id}",
+  "method": "PATCH",
+  "bodySchema": "PatchProject",
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": [
+   "200=ProjectResponse"
+  ]
+ },
+ {
+  "name": "runtimeOwnerCreateProjectInvitation",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/invitations",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "runtimeOwnerCreateIssue",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/issues",
+  "method": "POST",
+  "bodySchema": "CreateIssue",
+  "requiredHeaders": "",
+  "responses": [
+   "201=IssueResponse"
+  ]
+ },
+ {
+  "name": "runtimeOwnerGetIssue",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/issues/{issueId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueResponse"
+  ]
+ },
+ {
+  "name": "runtimeAgentUpdateIssue",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/issues/{issueId}",
+  "method": "PATCH",
+  "bodySchema": "RuntimeIssuePatch",
+  "requiredHeaders": "",
+  "responses": [
+   "200=IssueResponse"
+  ]
+ },
+ {
+  "name": "runtimeAgentBindIssueLabel",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/issues/{issueId}/labels/{labelId}",
+  "method": "PUT",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "runtimeAgentUnbindIssueLabel",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/issues/{issueId}/labels/{labelId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "runtimeOwnerLeaveProject",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/leave",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "runtimeOwnerJoinProjectAgent",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/members/agent",
+  "method": "POST",
+  "bodySchema": "ProjectAgentJoin",
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": [
+   "200=ProjectAgentMembershipResponse",
+   "201=ProjectAgentMembershipResponse"
+  ]
+ },
+ {
+  "name": "runtimeOwnerRemoveProjectHumanMember",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/members/human/{memberId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "runtimeOwnerCreateProjectTeam",
+  "path": "/api/v1/collaboration/runtime/projects/{id}/members/team",
+  "method": "POST",
+  "bodySchema": null,
+  "requiredHeaders": "\"Idempotency-Key\",\"If-Match\"",
+  "responses": [
+   "200=ProjectTeamAPIProjectTeamResponse",
+   "201=ProjectTeamAPIProjectTeamResponse"
+  ]
+ },
+ {
+  "name": "listTeamProfiles",
+  "path": "/api/v1/collaboration/team-profiles",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=TeamAPITeamProfilePageResponse"
+  ]
+ },
+ {
+  "name": "getTeamProfile",
+  "path": "/api/v1/collaboration/team-profiles/{teamProfileId}",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=TeamAPITeamProfileResponse"
+  ]
+ },
+ {
+  "name": "createTeamProfile",
+  "path": "/api/v1/collaboration/team-profiles/{teamProfileId}",
+  "method": "PUT",
+  "bodySchema": "TeamAPICreateTeamProfile",
+  "requiredHeaders": "",
+  "responses": [
+   "200=TeamAPITeamProfileResponse",
+   "201=TeamAPITeamProfileResponse"
+  ]
+ },
+ {
+  "name": "updateTeamProfile",
+  "path": "/api/v1/collaboration/team-profiles/{teamProfileId}",
+  "method": "PATCH",
+  "bodySchema": "TeamAPIPatchTeamProfile",
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": [
+   "200=TeamAPITeamProfileResponse"
+  ]
+ },
+ {
+  "name": "deleteTeamProfile",
+  "path": "/api/v1/collaboration/team-profiles/{teamProfileId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "\"If-Match\"",
+  "responses": []
+ },
+ {
+  "name": "updateTeamProfileInvocationPolicy",
+  "path": "/api/v1/collaboration/team-profiles/{teamProfileId}/invocation-policy",
+  "method": "PATCH",
+  "bodySchema": "TeamAPIProfilePolicyUpdate",
+  "requiredHeaders": "\"Idempotency-Key\"",
+  "responses": [
+   "200=TeamAPITeamProfileResponse"
+  ]
+ },
+ {
+  "name": "getCurrentUser",
+  "path": "/api/v1/collaboration/users/me",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=UserResponse"
+  ]
+ },
+ {
+  "name": "listCurrentUserFavorites",
+  "path": "/api/v1/collaboration/users/me/favorites",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=FavoritePage"
+  ]
+ },
+ {
+  "name": "putCurrentUserFavorite",
+  "path": "/api/v1/collaboration/users/me/favorites/{itemType}/{itemId}",
+  "method": "PUT",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=FavoriteResponse"
+  ]
+ },
+ {
+  "name": "deleteCurrentUserFavorite",
+  "path": "/api/v1/collaboration/users/me/favorites/{itemType}/{itemId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "setCurrentUserNickname",
+  "path": "/api/v1/collaboration/users/me/nickname",
+  "method": "PUT",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=UserResponse"
+  ]
+ },
+ {
+  "name": "listRuntimeCredentials",
+  "path": "/api/v1/collaboration/users/me/runtimes/{runtimeId}/credentials",
+  "method": "GET",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": [
+   "200=RuntimeCredentialPage"
+  ]
+ },
+ {
+  "name": "issueRuntimeCredential",
+  "path": "/api/v1/collaboration/users/me/runtimes/{runtimeId}/credentials",
+  "method": "POST",
+  "bodySchema": "IssueRuntimeCredential",
+  "requiredHeaders": "",
+  "responses": [
+   "201=IssuedRuntimeCredentialResponse"
+  ]
+ },
+ {
+  "name": "revokeRuntimeCredential",
+  "path": "/api/v1/collaboration/users/me/runtimes/{runtimeId}/credentials/{credentialId}",
+  "method": "DELETE",
+  "bodySchema": null,
+  "requiredHeaders": "",
+  "responses": []
+ },
+ {
+  "name": "acceptProjectInvitation",
+  "path": "/api/v1/collaboration/project-invitations/accept",
+  "method": "POST",
+  "bodySchema": "AcceptProjectInvitationInput",
+  "requiredHeaders": "",
+  "responses": [
+   "200=AcceptProjectInvitationResponse"
+  ]
+ },
+ {
+  "name": "previewProjectInvitation",
+  "path": "/api/v1/collaboration/project-invitations/preview",
+  "method": "POST",
+  "bodySchema": "PreviewProjectInvitationInput",
+  "requiredHeaders": "",
+  "responses": [
+   "200=PreviewProjectInvitationResponse"
+  ]
+ },
+ {
+  "name": "createProjectInvitation",
+  "path": "/api/v1/collaboration/projects/{id}/invitations",
+  "method": "POST",
+  "bodySchema": "CreateProjectInvitationInput",
+  "requiredHeaders": "",
+  "responses": [
+   "200=CreateProjectInvitationResponse",
+   "201=CreateProjectInvitationResponse"
+  ]
+ }
+]

@@ -1,0 +1,2 @@
+import{D as n}from"./index-nRmb_3VI.js";import"./purify.es-2FREwzWT.js";const o=/^ {0,3}<cite>[ \t]*\r?\n([\s\S]*?)\r?\n {0,3}<\/cite>[ \t]*(?:\r?\n+|$)/i;new n({gfm:!0,extensions:[{name:"pluginCitation",level:"block",tokenizer(t){const e=o.exec(t);if(e)return{type:"pluginCitation",raw:e[0],tokens:this.lexer.blockTokens(e[1])}},renderer(t){return`<blockquote class="plugin-citation">${this.parser.parse(t.tokens??[])}</blockquote>
+`},childTokens:["tokens"]}]});

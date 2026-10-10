@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "productId": "qoder-cn",
+  "target": {
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "version": "1.0.72.34cf9e2f",
+  "javascriptRuntime": {
+    "source": "qoder-electron",
+    "command": "C:\\Program Files\\Qoder CN\\Qoder CN.exe",
+    "electronRunAsNode": true,
+    "bundled": false
+  },
+  "mtreeNapiVersion": 10,
+  "build": {
+    "minified": true,
+    "sourceMap": false
+  },
+  "files": {
+    "entry": "qoder-search.bundle.mjs",
+    "scanWorker": "syncWorkspaceScanWorker.js",
+    "legacyMigrationWorker": "knowledge-legacy-migration-worker.js",
+    "mtreeLoader": "native/mtree/index.cjs",
+    "mtreeBinary": "native/mtree/mtree.win32-x64-msvc.node",
+    "ripgrep": "../bin/rg.exe",
+    "assetModule": "assets/r1/a.bin",
+    "assetBinary": "assets/r1/b.bin"
+  }
+}
