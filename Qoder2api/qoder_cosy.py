@@ -766,6 +766,26 @@ def build_request_body(chat: dict, model_config: dict | None) -> str:
 
 
 # ── 推理调用 ──────────────────────────────────────────────────────────────────
+def _iter_sse_lines(resp):
+    """逐行产出 SSE，并把流正文阶段的传输层中断归一成 UpstreamError。
+
+    requests.post 的异常在上面已经包成 UpstreamError，但 iter_lines 在读响应体
+    时抛的是原生 ConnectionError / ChunkedEncodingError / Timeout（上游 120s 没
+    吐首字节就是这条路径）。不转换的话，server 层「仅在未产出字节时重试」的判据
+    根本看不到它，只会落进最外层的 except Exception，打出一条没有 rid 的堆栈。
+    """
+    try:
+        for line in resp.iter_lines(decode_unicode=True):
+            yield line
+    except (requests.exceptions.ConnectionError,
+            requests.exceptions.ChunkedEncodingError,
+            requests.exceptions.Timeout) as error:
+        # 措辞与 requests.post 那条保持一致，复用 server 的 _connect_wait 判据
+        raise UpstreamError(502, f"upstream request failed: {error}") from error
+    finally:
+        resp.close()
+
+
 def run_qoder_cosy(
     messages: list[dict],
     model: str = "Auto",
@@ -862,7 +882,7 @@ def run_qoder_cosy(
         raise UpstreamError(resp.status_code, resp.text[:500])
 
     # 上游对这两个 path 只回 SSE，没有 JSON 单体响应形态
-    for line in resp.iter_lines(decode_unicode=True):
+    for line in _iter_sse_lines(resp):
         if not line or not line.startswith("data:"):
             continue
         payload = line[5:].strip()

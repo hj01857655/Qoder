@@ -255,22 +255,41 @@ def _rate_limit_wait(e) -> float:
         return 0.0
 
 
-# 连接类错误：出站 TLS/TCP 建连失败（Max retries / SSLEOF / SSLError），
-# 与凭证、限流无关，短退避重试即可
+# 连接类错误：出站 TLS/TCP 建连失败（Max retries / SSLEOF / SSLError）、以及
+# 流正文阶段的中断（读超时 / 连接被复位 / chunked 流断裂），与凭证、限流无关，
+# 短退避重试即可。判据依赖 qoder_cosy 把这两类都包成 "upstream request failed: …"
 CONNECT_RETRY_WAIT = 2.0
+# 一次尝试已经耗掉这么久还不产出，多半是上游卡死而非瞬时抖动：再重发只会把 worker
+# 按住几分钟（读超时是 QODER_TIMEOUT 秒）。用这个预算把慢失败限成只重试一次。
+CONNECT_RETRY_MAX_ELAPSED = float(os.environ.get("QODER_CONNECT_RETRY_MAX_ELAPSED", 150))
+
+_CONN_ERR_SIGNS = ("Max retries", "SSLEOFError", "SSLError", "ConnectionError",
+                   "ConnectionReset", "Connection aborted", "Connection reset",
+                   "Read timed out", "timed out", "ProtocolError", "ChunkedEncoding")
+
 
 def _connect_wait(e) -> float:
     """连接类错误返回短退避秒数，其他返回 0。仅对未产出字节的请求安全。"""
     text = str(e)
-    if ("upstream request failed" in text
-            and any(sig in text for sig in ("Max retries", "SSLEOFError", "SSLError", "ConnectionError", "ConnectionReset"))):
+    if "upstream request failed" in text and any(sig in text for sig in _CONN_ERR_SIGNS):
         return CONNECT_RETRY_WAIT
     return 0.0
 
 
-def _retry_wait(e) -> float:
-    """统一重试决策：限流按 waitTime 睡等，连接错误短退避，其他不重试。"""
-    return _rate_limit_wait(e) or _connect_wait(e)
+def _retry_wait(e, elapsed: float = 0.0) -> float:
+    """统一重试决策：限流按 waitTime 睡等，连接错误短退避，其他不重试。
+
+    elapsed 是本次请求已经花掉的秒数，用来给「慢失败」限次：快错误（建连失败、
+    秒级 TLS 中断）可以重试满 RATE_LIMIT_MAX_RETRIES；已经等满一次读超时的，
+    只再给一次机会。
+    """
+    rate_wait = _rate_limit_wait(e)
+    if rate_wait > 0:
+        return rate_wait
+    conn_wait = _connect_wait(e)
+    if conn_wait > 0 and elapsed > CONNECT_RETRY_MAX_ELAPSED:
+        return 0.0
+    return conn_wait
 
 
 # ── 聊天补全 ──────────────────────────────────────────────────────────────────
@@ -385,7 +404,7 @@ def _stream_chat_direct(messages, model_name, cid, now, temperature=None, max_to
                 except qoder_cosy.UpstreamError as e:
                     # 限流（10605）按 waitTime 睡等、连接类错误短退避；
                     # 均仅在尚未给客户端产出任何字节时重试，否则透传错误
-                    wait = _retry_wait(e)
+                    wait = _retry_wait(e, time.time() - t0)
                     if produced or attempts >= RATE_LIMIT_MAX_RETRIES or wait <= 0:
                         raise
                     attempts += 1
@@ -402,12 +421,13 @@ def _stream_chat_direct(messages, model_name, cid, now, temperature=None, max_to
                     yield ": retrying\n\n"
         except qoder_cosy.UpstreamError as e:
             errored = True
-            logger.warning("direct stream upstream error: %s", e)
+            logger.warning("[%s] direct stream upstream error: %s", rid, e)
             err = {"error": {"message": str(e), "type": "upstream_error", "code": e.status}}
             yield f"data: {json.dumps(err, ensure_ascii=False)}\n\n"
         except Exception as e:
             errored = True
-            logger.exception("direct stream failure")
+            # 带上 rid：没有 rid 的堆栈无法和 in:/done: 行对上，排障只能靠猜时间
+            logger.exception("[%s] direct stream failure", rid)
             err = {"error": {"message": str(e), "type": "api_error", "code": 502}}
             yield f"data: {json.dumps(err, ensure_ascii=False)}\n\n"
         if not errored:
@@ -475,16 +495,16 @@ def _full_chat_direct(messages, model_name, cid, now, max_tokens, temperature=No
         except qoder_cosy.UpstreamError as e:
             # 非流式在聚合开始前整体重试是安全的（无半截内容）；限流按 waitTime、
             # 连接错误短退避，持续失败则透传
-            wait = _retry_wait(e)
+            wait = _retry_wait(e, time.time() - g.t0)
             if attempts >= RATE_LIMIT_MAX_RETRIES or wait <= 0:
-                logger.warning("direct upstream error: %s", e)
+                logger.warning("[%s] direct upstream error: %s", g.rid, e)
                 return jsonify({"error": {"message": str(e), "type": "upstream_error", "code": e.status}}), e.status
             attempts += 1
-            logger.warning("[%s] 上游排队限流(10605)，%.0fs 后第 %d/%d 次重试",
-                           g.rid, wait, attempts, RATE_LIMIT_MAX_RETRIES)
+            logger.warning("[%s] 上游错误重试(%s)，%.0fs 后第 %d/%d 次",
+                           g.rid, getattr(e, "status", "?"), wait, attempts, RATE_LIMIT_MAX_RETRIES)
             time.sleep(wait)
         except Exception as e:
-            logger.exception("upstream request failed")
+            logger.exception("[%s] upstream request failed", g.rid)
             return jsonify({"error": {"message": str(e), "type": "api_error"}}), 502
 
     message = {"role": "assistant", "content": "".join(content_parts)}
@@ -567,11 +587,11 @@ def _stream_completions_direct(messages, model_name, cid, now, temperature=None,
                     yield f"data: {json.dumps(chunk(ev['text']), ensure_ascii=False)}\n\n"
         except qoder_cosy.UpstreamError as e:
             errored = True
-            logger.warning("direct completions upstream error: %s", e)
+            logger.warning("[%s] direct completions upstream error: %s", rid, e)
             yield f"data: {json.dumps({'error': {'message': str(e), 'type': 'upstream_error', 'code': e.status}}, ensure_ascii=False)}\n\n"
         except Exception as e:
             errored = True
-            logger.exception("direct completions failure")
+            logger.exception("[%s] direct completions failure", rid)
             yield f"data: {json.dumps({'error': {'message': str(e), 'type': 'api_error', 'code': 502}}, ensure_ascii=False)}\n\n"
         if not errored:
             yield f"data: {json.dumps(chunk('', finish_reason or 'stop'), ensure_ascii=False)}\n\n"
@@ -599,10 +619,10 @@ def _full_completions_direct(messages, model_name, cid, now, temperature=None, m
             elif etype == "finish":
                 finish_reason = ev["reason"]
     except qoder_cosy.UpstreamError as e:
-        logger.warning("direct completions upstream error: %s", e)
+        logger.warning("[%s] direct completions upstream error: %s", getattr(g, "rid", "?"), e)
         return jsonify({"error": {"message": str(e), "type": "upstream_error", "code": e.status}}), e.status
     except Exception as e:
-        logger.exception("direct completions failure")
+        logger.exception("[%s] direct completions failure", getattr(g, "rid", "?"))
         return jsonify({"error": {"message": str(e), "type": "api_error"}}), 502
 
     return jsonify({
