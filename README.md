@@ -19,22 +19,6 @@
 | 10 | [机器标识与风控指纹](docs/10-机器标识与风控指纹.md) | runtime-info.exe 调用协议、Cosy-Machine* 头注入、auth.machine-id、代码流 |
 | 11 | [CLI 协议与直接 API](docs/11-CLI协议与直接API.md) | 两代推理协议、端点清单、Token 类型、双后端网关实现 |
 
-## 目录结构
-
-```
-qoder/
-├── docs/               逆向文档
-├── scripts/            asar 解析与扫描工具
-├── qoder2api/         OpenAI 兼容网关（双后端：CLI 包装 + 直接 API）
-└── evidence/
-    └── 01-observe/
-        ├── asar-index.json     asar 文件索引（4658 条）
-        ├── business-codes.json 610 个业务错误码分类
-        ├── out-main/           主进程代码（20 文件 / 11.95 MB）
-        ├── out-renderer/       渲染进程（1131 chunk / 74.18 MB）
-        └── out-preload/        preload（5 文件 / 5.89 MB）
-```
-
 ## 快速上手
 
 ```powershell
