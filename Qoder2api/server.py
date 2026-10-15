@@ -22,6 +22,7 @@ from flask import Flask, Response, g, jsonify, request
 
 import benefit
 import qoder_cosy
+import responses_bridge as rb
 
 app = Flask(__name__)
 
@@ -343,6 +344,157 @@ def chat_completions():
                              preserve_thinking=preserve_thinking)
 
 
+# ── OpenAI Responses 端点（grok-build / Codex 等原生 Responses 客户端）──────
+# 上游仍是 COSY 事件流：请求体经 responses_bridge 转成 Chat，与 chat 共用同一
+# 事件源与 Chat SSE 行帧化（_chat_direct_lines），响应侧包成 Responses SSE
+# （每帧带 sequence_number）。
+@app.route("/v1/responses", methods=["POST"])
+def responses_api():
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict) or not body:
+        return jsonify({"error": {"message": "invalid request: JSON object body required",
+                                  "type": "invalid_request_error"}}), 400
+
+    chat_body = rb.responses_to_chat(body)
+    messages = chat_body.get("messages", [])
+    if not messages:
+        return jsonify({"error": {"message": "invalid request: 'input' is required",
+                                  "type": "invalid_request_error"}}), 400
+
+    model_req = body.get("model", "auto")
+    stream = bool(body.get("stream"))
+    max_tokens = chat_body.get("max_tokens")
+    temperature = chat_body.get("temperature")
+    top_p = chat_body.get("top_p")
+    tools = chat_body.get("tools")
+    tool_choice = chat_body.get("tool_choice")
+    parallel_tool_calls = chat_body.get("parallel_tool_calls")
+    cid = "chatcmpl-" + uuid.uuid4().hex
+    now = int(time.time())
+    rid, t0 = g.rid, g.t0
+
+    if stream:
+        # responses 必须带 usage：强制 include_usage，让 bridge 拿到 token 数
+        lines = _chat_direct_lines(messages, model_req, cid, now, rid, t0,
+                                   temperature=temperature, max_tokens=max_tokens,
+                                   top_p=top_p, tools=tools, tool_choice=tool_choice,
+                                   parallel_tool_calls=parallel_tool_calls,
+                                   include_usage=True)
+
+        def generate():
+            # Qoder 的 _stream_log 按 str 攒帧落盘（chat 路径也是 str 帧），边界解码
+            for frame in rb.chat_sse_to_responses(lines, model_req):
+                yield frame.decode("utf-8")
+
+        return Response(_stream_log(generate(), rid, t0), mimetype="text/event-stream",
+                        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+    result = _full_chat_direct(messages, model_req, cid, now, max_tokens, temperature,
+                               top_p=top_p, tools=tools, tool_choice=tool_choice,
+                               parallel_tool_calls=parallel_tool_calls)
+    if result.status_code != 200:
+        return result
+    chat_json = json.loads(result.get_data())
+    return jsonify(rb.chat_json_to_responses(chat_json, model_req))
+
+
+def _chat_direct_lines(messages, model_name, cid, now, rid, t0, temperature=None, max_tokens=None,
+                       top_p=None, top_k=None, context_length=None,
+                       tools=None, tool_choice=None, parallel_tool_calls=None,
+                       reasoning_effort=None,
+                       enable_thinking=None, preserve_thinking=None,
+                       reasoning_budget_tokens=None,
+                       include_usage=False):
+    """产出 Chat SSE 原始行（带 data: 前缀，含 [DONE] 收尾帧）。
+
+    chat 与 responses 路由共用：后者用 responses_bridge 把这行流再包成
+    Responses SSE（每帧带 sequence_number）。
+    """
+    finish_reason = None
+    role_sent = False
+    usage = None
+    errored = False
+
+    def chunk(delta, fr=None):
+        return {"id": cid, "object": "chat.completion.chunk", "created": now, "model": model_name,
+                "choices": [{"index": 0, "delta": delta, "finish_reason": fr}]}
+
+    try:
+        attempts = 0
+        produced = False
+        while True:
+            try:
+                for ev in qoder_cosy.run_qoder_cosy(
+                    messages, model=model_name, stream=True, max_tokens=max_tokens, timeout=QODER_TIMEOUT,
+                    tools=tools, tool_choice=tool_choice,
+                    parallel_tool_calls=parallel_tool_calls,
+                    reasoning_effort=reasoning_effort,
+                    temperature=temperature, top_p=top_p, top_k=top_k,
+                    context_length=context_length,
+                    enable_thinking=enable_thinking,
+                    reasoning_budget_tokens=reasoning_budget_tokens,
+                    preserve_thinking=preserve_thinking,
+                ):
+                    produced = True
+                    etype = ev["type"]
+                    if etype == "finish":
+                        finish_reason = ev["reason"]
+                        continue
+                    if etype == "usage":
+                        usage = _openai_usage(ev["usage"])
+                        continue
+                    delta = {}
+                    if not role_sent:
+                        delta["role"] = "assistant"
+                        role_sent = True
+                    if etype == "reasoning":
+                        delta["reasoning_content"] = ev["text"]
+                    elif etype == "content":
+                        delta["content"] = ev["text"]
+                    elif etype == "tool_calls":
+                        delta["tool_calls"] = ev["delta"]
+                    yield f"data: {json.dumps(chunk(delta), ensure_ascii=False)}\n\n"
+                break
+            except qoder_cosy.UpstreamError as e:
+                # 限流（10605）按 waitTime 睡等、连接类错误短退避；
+                # 均仅在尚未给客户端产出任何字节时重试，否则透传错误
+                wait = _retry_wait(e, time.time() - t0)
+                if produced or attempts >= RATE_LIMIT_MAX_RETRIES or wait <= 0:
+                    raise
+                attempts += 1
+                logger.warning("[%s] 上游错误重试(%s)，%.0fs 后第 %d/%d 次",
+                               rid, getattr(e, "status", "?"), wait, attempts, RATE_LIMIT_MAX_RETRIES)
+                # 睡等期间向客户端发 SSE 注释行心跳（客户端忽略内容但会重置
+                # 首帧超时），防止 30s 等待被 ai-sdk 之类的客户端掐断
+                beat_deadline = time.time() + wait
+                while time.time() < beat_deadline:
+                    remain = beat_deadline - time.time()
+                    time.sleep(min(5.0, max(remain, 0.1)))
+                    if time.time() < beat_deadline:
+                        yield ": keep-alive\n\n"
+                yield ": retrying\n\n"
+    except qoder_cosy.UpstreamError as e:
+        errored = True
+        logger.warning("[%s] direct stream upstream error: %s", rid, e)
+        err = {"error": {"message": str(e), "type": "upstream_error", "code": e.status}}
+        yield f"data: {json.dumps(err, ensure_ascii=False)}\n\n"
+    except Exception as e:
+        errored = True
+        # 带上 rid：没有 rid 的堆栈无法和 in:/done: 行对上，排障只能靠猜时间
+        logger.exception("[%s] direct stream failure", rid)
+        err = {"error": {"message": str(e), "type": "api_error", "code": 502}}
+        yield f"data: {json.dumps(err, ensure_ascii=False)}\n\n"
+    if not errored:
+        done = {"id": cid, "object": "chat.completion.chunk", "created": now, "model": model_name,
+                "choices": [{"index": 0, "delta": {}, "finish_reason": finish_reason or "stop"}]}
+        yield f"data: {json.dumps(done, ensure_ascii=False)}\n\n"
+        if include_usage:
+            usage_chunk = {"id": cid, "object": "chat.completion.chunk", "created": now,
+                           "model": model_name, "choices": [], "usage": usage or {}}
+            yield f"data: {json.dumps(usage_chunk, ensure_ascii=False)}\n\n"
+    yield "data: [DONE]\n\n"
+
+
 def _stream_chat_direct(messages, model_name, cid, now, temperature=None, max_tokens=None,
                         top_p=None, top_k=None, context_length=None,
                         tools=None, tool_choice=None, parallel_tool_calls=None,
@@ -354,92 +506,16 @@ def _stream_chat_direct(messages, model_name, cid, now, temperature=None, max_to
     # 生成器在请求上下文销毁后才被消费，g 不可用；rid/t0 必须在此取出（与 _stream_log 同理）
     rid = g.rid
     t0 = g.t0
-
-    def generate():
-        finish_reason = None
-        role_sent = False
-        usage = None
-        errored = False
-
-        def chunk(delta, fr=None):
-            return {"id": cid, "object": "chat.completion.chunk", "created": now, "model": model_name,
-                    "choices": [{"index": 0, "delta": delta, "finish_reason": fr}]}
-
-        try:
-            attempts = 0
-            produced = False
-            while True:
-                try:
-                    for ev in qoder_cosy.run_qoder_cosy(
-                        messages, model=model_name, stream=True, max_tokens=max_tokens, timeout=QODER_TIMEOUT,
-                        tools=tools, tool_choice=tool_choice,
-                        parallel_tool_calls=parallel_tool_calls,
-                        reasoning_effort=reasoning_effort,
-                        temperature=temperature, top_p=top_p, top_k=top_k,
-                        context_length=context_length,
-                        enable_thinking=enable_thinking,
-                        reasoning_budget_tokens=reasoning_budget_tokens,
-                        preserve_thinking=preserve_thinking,
-                    ):
-                        produced = True
-                        etype = ev["type"]
-                        if etype == "finish":
-                            finish_reason = ev["reason"]
-                            continue
-                        if etype == "usage":
-                            usage = _openai_usage(ev["usage"])
-                            continue
-                        delta = {}
-                        if not role_sent:
-                            delta["role"] = "assistant"
-                            role_sent = True
-                        if etype == "reasoning":
-                            delta["reasoning_content"] = ev["text"]
-                        elif etype == "content":
-                            delta["content"] = ev["text"]
-                        elif etype == "tool_calls":
-                            delta["tool_calls"] = ev["delta"]
-                        yield f"data: {json.dumps(chunk(delta), ensure_ascii=False)}\n\n"
-                    break
-                except qoder_cosy.UpstreamError as e:
-                    # 限流（10605）按 waitTime 睡等、连接类错误短退避；
-                    # 均仅在尚未给客户端产出任何字节时重试，否则透传错误
-                    wait = _retry_wait(e, time.time() - t0)
-                    if produced or attempts >= RATE_LIMIT_MAX_RETRIES or wait <= 0:
-                        raise
-                    attempts += 1
-                    logger.warning("[%s] 上游错误重试(%s)，%.0fs 后第 %d/%d 次",
-                                   rid, getattr(e, "status", "?"), wait, attempts, RATE_LIMIT_MAX_RETRIES)
-                    # 睡等期间向客户端发 SSE 注释行心跳（客户端忽略内容但会重置
-                    # 首帧超时），防止 30s 等待被 ai-sdk 之类的客户端掐断
-                    beat_deadline = time.time() + wait
-                    while time.time() < beat_deadline:
-                        remain = beat_deadline - time.time()
-                        time.sleep(min(5.0, max(remain, 0.1)))
-                        if time.time() < beat_deadline:
-                            yield ": keep-alive\n\n"
-                    yield ": retrying\n\n"
-        except qoder_cosy.UpstreamError as e:
-            errored = True
-            logger.warning("[%s] direct stream upstream error: %s", rid, e)
-            err = {"error": {"message": str(e), "type": "upstream_error", "code": e.status}}
-            yield f"data: {json.dumps(err, ensure_ascii=False)}\n\n"
-        except Exception as e:
-            errored = True
-            # 带上 rid：没有 rid 的堆栈无法和 in:/done: 行对上，排障只能靠猜时间
-            logger.exception("[%s] direct stream failure", rid)
-            err = {"error": {"message": str(e), "type": "api_error", "code": 502}}
-            yield f"data: {json.dumps(err, ensure_ascii=False)}\n\n"
-        if not errored:
-            done = {"id": cid, "object": "chat.completion.chunk", "created": now, "model": model_name,
-                    "choices": [{"index": 0, "delta": {}, "finish_reason": finish_reason or "stop"}]}
-            yield f"data: {json.dumps(done, ensure_ascii=False)}\n\n"
-            if include_usage:
-                usage_chunk = {"id": cid, "object": "chat.completion.chunk", "created": now,
-                               "model": model_name, "choices": [], "usage": usage or {}}
-                yield f"data: {json.dumps(usage_chunk, ensure_ascii=False)}\n\n"
-        yield "data: [DONE]\n\n"
-    return Response(_stream_log(generate(), rid, t0), mimetype="text/event-stream",
+    lines = _chat_direct_lines(messages, model_name, cid, now, rid, t0,
+                               temperature=temperature, max_tokens=max_tokens,
+                               top_p=top_p, top_k=top_k, context_length=context_length,
+                               tools=tools, tool_choice=tool_choice,
+                               parallel_tool_calls=parallel_tool_calls,
+                               reasoning_effort=reasoning_effort,
+                               enable_thinking=enable_thinking, preserve_thinking=preserve_thinking,
+                               reasoning_budget_tokens=reasoning_budget_tokens,
+                               include_usage=include_usage)
+    return Response(_stream_log(lines, rid, t0), mimetype="text/event-stream",
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 

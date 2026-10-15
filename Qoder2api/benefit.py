@@ -31,6 +31,23 @@ USAGE_PATH = "/sash/api/v2/me/usage"
 # 签到检查间隔 (秒)
 CHECK_INTERVAL = 3600
 
+# 签到日志。之前只有 print 到 stdout：网关在后台起时控制台看不见，于是这条链上
+# 任何一次成功或失败都不留痕迹 —— "到底签没签"根本无从查证。落一份文件。
+LOG_FILE = Path(__file__).with_name("benefit.log")
+
+
+def _log(msg: str, flush: bool = True) -> None:
+    """既打到 stdout（前台跑看得见），也追加进 benefit.log。
+
+    写日志失败绝不往上抛：磁盘满或文件被占用都不该让签到线程死掉。
+    """
+    print(msg, flush=flush)
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now(CN_TZ).strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
+    except OSError:
+        pass
+
 # 活动轮次开放时刻 (UTC+8)：每日 Credits 与兑换码都在这一时刻开新轮
 # （实测 2026-10-12：CREDITS 活动 startAt=10-12 10:00、endAt=10-13 09:59）。
 # 注意：只有奶茶抢领会到点才抢；每日签到不看这个时刻，而是听服务端
@@ -73,7 +90,7 @@ def _get_token() -> str | None:
     try:
         return qoder_cosy.load_identity().get("access_token")
     except Exception as e:  # noqa: BLE001 — 无凭证时降级为错误返回，不抛
-        print(f"[benefit] 凭证不可用: {type(e).__name__}", flush=True)
+        _log(f"[benefit] 凭证不可用: {type(e).__name__}", flush=True)
         return None
 
 
@@ -180,16 +197,16 @@ def claim_campaign(campaign_id: str, is_cn: bool = True) -> dict:
             b = data.get("benefit") or {}
             tag = "幂等回显（此前已领）" if data.get("replayed") else "新发放"
             if data.get("status") == "CLAIMED":
-                print(f"[benefit] ✅ 领取成功 {b.get('kind')} x{b.get('amount')}（{tag}）"
+                _log(f"[benefit] ✅ 领取成功 {b.get('kind')} x{b.get('amount')}（{tag}）"
                       f" campaign={data.get('campaignKey') or campaign_id}", flush=True)
             else:
-                print(f"[benefit] ❌ 领取未成功: "
+                _log(f"[benefit] ❌ 领取未成功: "
                       f"{data.get('failureCode') or data.get('status')}（{tag}）", flush=True)
             return data
-        print(f"[benefit] ❌ 领取失败: HTTP {r.status_code} {r.text[:200]}", flush=True)
+        _log(f"[benefit] ❌ 领取失败: HTTP {r.status_code} {r.text[:200]}", flush=True)
         return {"error": f"HTTP {r.status_code}", "body": r.text[:500], "status": "FAILED"}
     except Exception as e:
-        print(f"[benefit] ❌ 领取异常: {type(e).__name__}: {e}", flush=True)
+        _log(f"[benefit] ❌ 领取异常: {type(e).__name__}: {e}", flush=True)
         return {"error": f"{type(e).__name__}: {e}", "status": "FAILED"}
 
 
@@ -212,7 +229,7 @@ def check_and_claim(is_cn: bool = True, auto_open: bool = True) -> dict:
     if "error" in status:
         result["error"] = status["error"]
         result["reason"] = REASON_QUERY_FAILED
-        print(f"[benefit] 活动列表查询失败（{status['error']}），本轮不记账，下一轮重试", flush=True)
+        _log(f"[benefit] 活动列表查询失败（{status['error']}），本轮不记账，下一轮重试", flush=True)
         return result
 
     result["claimable"] = status["claimable"]
@@ -234,7 +251,7 @@ def check_and_claim(is_cn: bool = True, auto_open: bool = True) -> dict:
         # 这里按 benefit.kind 到底有没有投放来区分，并把服务端返回的列表摘要打出来
         delivered = [_benefit_kind(c) == "CREDITS" for c in status.get("campaigns", [])]
         result["reason"] = REASON_ALREADY if any(delivered) else REASON_NOT_DELIVERED
-        print(f"[benefit] 无可领活动（{result['reason']}），服务端投放: "
+        _log(f"[benefit] 无可领活动（{result['reason']}），服务端投放: "
               f"{[_brief(c) for c in status.get('campaigns', [])]}", flush=True)
         return result
 
@@ -242,7 +259,7 @@ def check_and_claim(is_cn: bool = True, auto_open: bool = True) -> dict:
     for c in status["claimable_campaigns"]:
         cid = c["campaignId"]
         if _benefit_kind(c) == "REDEMPTION_CODE" and _coffee_claimed(cid):
-            print(f"[benefit] {c.get('campaignKey')} 本地标记已领过，跳过 claim", flush=True)
+            _log(f"[benefit] {c.get('campaignKey')} 本地标记已领过，跳过 claim", flush=True)
             skipped += 1
             continue
         claim_result = claim_campaign(cid, is_cn=is_cn)
@@ -290,19 +307,19 @@ def _daily_check_loop(is_cn: bool = True, auto_open: bool = True):
         now_cn = datetime.now(CN_TZ)
         try:
             if next_check <= now_cn:
-                print(f"[benefit] 签到检查 ({now_cn.strftime('%Y-%m-%d %H:%M')} UTC+8)", flush=True)
+                _log(f"[benefit] 签到检查 ({now_cn.strftime('%Y-%m-%d %H:%M')} UTC+8)", flush=True)
                 result = check_and_claim(is_cn=is_cn, auto_open=auto_open)
                 reason = result.get("reason")
                 if reason in DEFINITIVE_REASONS:
                     next_check = _round_end(result) or (now_cn + timedelta(seconds=CHECK_INTERVAL))
-                    print(f"[benefit] 本轮已了结（{reason}），下一轮 {next_check.strftime('%m-%d %H:%M:%S')} UTC+8 再查", flush=True)
+                    _log(f"[benefit] 本轮已了结（{reason}），下一轮 {next_check.strftime('%m-%d %H:%M:%S')} UTC+8 再查", flush=True)
                 else:
                     # NOT_DELIVERED / 查询或领取失败：活动可能晚点才投放，每小时重试
                     next_check = now_cn + timedelta(seconds=CHECK_INTERVAL)
-                    print(f"[benefit] 本轮不记账（{reason}），稍后重试", flush=True)
+                    _log(f"[benefit] 本轮不记账（{reason}），稍后重试", flush=True)
             delay = _sleep_delay(next_check, datetime.now(CN_TZ))
         except Exception as e:
-            print(f"[benefit] 签到检查异常: {e}", flush=True)
+            _log(f"[benefit] 签到检查异常: {e}", flush=True)
             next_check = datetime.now(CN_TZ) + timedelta(seconds=CHECK_INTERVAL)
             delay = CHECK_INTERVAL
 
@@ -313,16 +330,16 @@ def start_daily_checkin(is_cn: bool = True, auto_open: bool = True):
     """启动每日签到线程 + 奶茶抢领线程 (daemon)"""
     token = _get_token()
     if not token:
-        print(f"[benefit] ⚠️ 无自有凭证，签到线程不启动 (先运行: python oauth.py)", flush=True)
+        _log(f"[benefit] ⚠️ 无自有凭证，签到线程不启动 (先运行: python oauth.py)", flush=True)
         return None
     t = threading.Thread(target=_daily_check_loop, args=(is_cn, auto_open), daemon=True)
     t.start()
-    print(f"[benefit] 每日签到线程已启动 (CN={is_cn}, 全自动 API 签到)", flush=True)
+    _log(f"[benefit] 每日签到线程已启动 (CN={is_cn}, 全自动 API 签到)", flush=True)
 
     # 奶茶免单卡抢领线程
     t2 = threading.Thread(target=_coffee_claim_loop, args=(is_cn,), daemon=True)
     t2.start()
-    print(f"[benefit] 🧋 奶茶抢领线程已启动 (每天 10:00:00 UTC+8 精准抢领)", flush=True)
+    _log(f"[benefit] 🧋 奶茶抢领线程已启动 (每天 10:00:00 UTC+8 精准抢领)", flush=True)
     return t
 
 
@@ -388,7 +405,7 @@ def _resolve_coffee_target(is_cn: bool = True) -> str | None:
     codes = [c for c in status.get("campaigns", []) if _benefit_kind(c) == "REDEMPTION_CODE"]
     if not codes:
         if status.get("error"):
-            print(f"[benefit] 奶茶：活动列表查询失败（{status['error']}），按旧 ID 试一轮", flush=True)
+            _log(f"[benefit] 奶茶：活动列表查询失败（{status['error']}），按旧 ID 试一轮", flush=True)
         return None if _coffee_claimed(COFFEE_CAMPAIGN_ID) else COFFEE_CAMPAIGN_ID
     for c in codes:
         if c.get("claimStatus") == "CLAIMABLE" and not _coffee_claimed(c["campaignId"]):
@@ -400,10 +417,10 @@ def claim_coffee_card(is_cn: bool = True, campaign_id: str | None = None) -> dic
     """抢领兑换码活动，100ms 间隔重试 30 秒；已领过（本地标记或服务端幂等回显）不再发 claim"""
     cid = campaign_id or _resolve_coffee_target(is_cn=is_cn)
     if not cid:
-        print("[benefit] 奶茶：本轮无可抢的兑换码活动（已领过或服务端未投放）", flush=True)
+        _log("[benefit] 奶茶：本轮无可抢的兑换码活动（已领过或服务端未投放）", flush=True)
         return {"status": "SKIPPED", "reason": "no_claimable_redemption_code"}
     if _coffee_claimed(cid):
-        print(f"[benefit] 奶茶免单卡 {cid} 已领取过（本地标记），跳过抢领", flush=True)
+        _log(f"[benefit] 奶茶免单卡 {cid} 已领取过（本地标记），跳过抢领", flush=True)
         return {"status": "ALREADY_CLAIMED", "campaignId": cid}
     token = _get_token()
     if not token:
@@ -424,29 +441,29 @@ def claim_coffee_card(is_cn: bool = True, campaign_id: str | None = None) -> dic
                     # 每人限领一次：CLAIMED 即终态（replayed=true 表示此前已领，同样落标记）
                     _mark_coffee_claimed(cid)
                     tag = "幂等回显（此前已领）" if data.get("replayed") else f"第 {attempt} 次"
-                    print(f"[benefit] 🧋 奶茶免单卡领取成功 ({tag})", flush=True)
+                    _log(f"[benefit] 🧋 奶茶免单卡领取成功 ({tag})", flush=True)
                     return data
                 # FAILED but 200 — 可能是 OUT_OF_STOCK，继续重试
                 failure = data.get("failureCode", "")
                 if attempt <= 3 or attempt % 10 == 0:
-                    print(f"[benefit] 奶茶抢领第 {attempt} 次: {failure}", flush=True)
+                    _log(f"[benefit] 奶茶抢领第 {attempt} 次: {failure}", flush=True)
                 if failure != "REDEMPTION_CODE_OUT_OF_STOCK":
                     if failure == "SAME_PERSON_DEPENDENCY_UNAVAILABLE":
                         # 风控要真机指纹（runtime-info.exe）；本仓库的头故意不带
                         # Cosy-MachineToken（带了会反过来隐藏每日 Credits），重试无意义
-                        print("[benefit] 🧋 风控要求真机机器指纹，当前头组合无法满足，停止抢领", flush=True)
+                        _log("[benefit] 🧋 风控要求真机机器指纹，当前头组合无法满足，停止抢领", flush=True)
                     return data
             elif r.status_code == 429:
-                print(f"[benefit] 奶茶抢领被限流，等待 1s", flush=True)
+                _log(f"[benefit] 奶茶抢领被限流，等待 1s", flush=True)
                 time.sleep(1)
             else:
-                print(f"[benefit] 奶茶抢领 HTTP {r.status_code}: {r.text[:200]}", flush=True)
+                _log(f"[benefit] 奶茶抢领 HTTP {r.status_code}: {r.text[:200]}", flush=True)
         except Exception as e:
             if attempt <= 3:
-                print(f"[benefit] 奶茶抢领异常: {e}", flush=True)
+                _log(f"[benefit] 奶茶抢领异常: {e}", flush=True)
         time.sleep(COFFEE_RETRY_INTERVAL)
 
-    print(f"[benefit] 奶茶抢领结束，共尝试 {attempt} 次未成功", flush=True)
+    _log(f"[benefit] 奶茶抢领结束，共尝试 {attempt} 次未成功", flush=True)
     return {"status": "FAILED", "failureCode": "RETRY_EXHAUSTED", "attempts": attempt}
 
 
@@ -473,26 +490,26 @@ def _coffee_claim_loop(is_cn: bool = True):
             if wait > 0:
                 # 分段睡到点（每次最多 1 小时），最后一跳落在 10:00:00 附近
                 if wait > 3600:
-                    print(f"[benefit] 奶茶抢领等待 {wait:.0f}s 到 {CLAIM_OPEN_HOUR}:00:00", flush=True)
+                    _log(f"[benefit] 奶茶抢领等待 {wait:.0f}s 到 {CLAIM_OPEN_HOUR}:00:00", flush=True)
                 time.sleep(min(wait, 3600))
                 continue
 
             burst_dates.add(today)
             if started >= target:
-                print(f"[benefit] 奶茶抢领：启动时已过 {CLAIM_OPEN_HOUR}:00，今天不补抢，等明天那一轮", flush=True)
+                _log(f"[benefit] 奶茶抢领：启动时已过 {CLAIM_OPEN_HOUR}:00，今天不补抢，等明天那一轮", flush=True)
                 continue
 
-            print(f"[benefit] 🧋 开始抢领兑换码活动 ({now_cn.strftime('%Y-%m-%d %H:%M:%S')} UTC+8)", flush=True)
+            _log(f"[benefit] 🧋 开始抢领兑换码活动 ({now_cn.strftime('%Y-%m-%d %H:%M:%S')} UTC+8)", flush=True)
             result = claim_coffee_card(is_cn=is_cn)
             status = result.get("status")
             if status in ("SKIPPED", "ALREADY_CLAIMED"):
-                print(f"[benefit] 奶茶本轮无需抢领: {result.get('reason') or result.get('campaignId')}", flush=True)
+                _log(f"[benefit] 奶茶本轮无需抢领: {result.get('reason') or result.get('campaignId')}", flush=True)
             elif status == "FAILED":
-                print(f"[benefit] 奶茶今日未抢到: {result.get('failureCode', result.get('error', '?'))}", flush=True)
+                _log(f"[benefit] 奶茶今日未抢到: {result.get('failureCode', result.get('error', '?'))}", flush=True)
             else:
-                print("[benefit] 🧋 奶茶免单卡已到手!", flush=True)
+                _log("[benefit] 🧋 奶茶免单卡已到手!", flush=True)
         except Exception as e:
-            print(f"[benefit] 奶茶抢领异常: {e}", flush=True)
+            _log(f"[benefit] 奶茶抢领异常: {e}", flush=True)
 
         time.sleep(60)  # 每分钟检查一次是否到 10:00
 
