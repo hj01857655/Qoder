@@ -36,7 +36,7 @@ Model    : /v1/models 返回的 id
 |---|---|---|
 | `/v1/chat/completions` | POST | OpenAI Chat Completions（流式/非流式） |
 | `/v1/completions` | POST | OpenAI Completions（文本补全） |
-| `/v1/responses` | POST | OpenAI Responses API（翻译层 ⇄ Chat） |
+| `/v1/responses` | POST | OpenAI Responses API（请求翻 Chat 调上游，响应由桥重放原生事件流） |
 | `/v1/messages` | POST | Anthropic Messages API（翻译层 ⇄ Chat） |
 | `/v1/models` | GET | 可用模型列表 |
 
@@ -45,10 +45,12 @@ Model    : /v1/models 返回的 id
 ```
 客户端                 proxy 翻译层              上游（COSY）
 ─────────            ─────────────            ─────────────
-Chat Completions ──→  COSY→Chat           ──→  gateway.qoder.com.cn
-Responses        ──→  responses_to_chat  ──→  gateway.qoder.com.cn
-Anthropic        ──→  anthropic_to_chat  ──→  gateway.qoder.com.cn
-                    ↑ 响应翻回各自格式
+Chat Completions ──→  直通                 ──→  gateway.qoder.com.cn
+Responses        ──→  responses_bridge     ──→  gateway.qoder.com.cn
+                      （请求翻 Chat；响应重放 Responses 事件流——sequence_number
+                        递增、终帧携带聚合全文与 usage）
+Anthropic        ──→  anthropic_bridge     ──→  gateway.qoder.com.cn
+                      （双向翻译）
 ```
 
 上游走 COSY 事件流协议，网关先转成 Chat Completions 格式，再按客户端协议翻回。`cache_control` 等 Anthropic 特有字段无 Chat 对应项，翻译时丢弃；上游思维链经 `reasoning_content` 通道结构化返回，Anthropic 客户端侧以纯文本块交付。
