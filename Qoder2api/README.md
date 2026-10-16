@@ -8,6 +8,9 @@
 
 - **三协议兼容**：OpenAI Chat Completions · OpenAI Responses · Anthropic Messages
 - **COSY 协议适配**：上游 `gateway.qoder.com.cn` 走 COSY 事件流，网关转标准 OpenAI 格式
+- **思维链结构化**：上游 `reasoning_content` 独立通道返回；上游偶发把 `<think>` 模板标签内联进正文时，跨 chunk 分流状态机实时归位，孤立/嵌套标签按噪声丢弃
+- **出站历史净化**：回传给上游的 assistant 历史自动剥离内联 think 标签，污染不会每轮回显
+- **antml 工具调用回收**：模型把工具调用写成正文文本时（流式/非流式），自动拆回结构化 `tool_calls`
 - **OAuth 登录**：设备流授权，后台自动续期
 - **WebUI 管理面板**：凭证状态 / 模型列表
 - **流式 / 非流式双模式**
@@ -48,7 +51,7 @@ Anthropic        ──→  anthropic_to_chat  ──→  gateway.qoder.com.cn
                     ↑ 响应翻回各自格式
 ```
 
-上游走 COSY 事件流协议，网关先转成 Chat Completions 格式，再按客户端协议翻回。`thinking`、`cache_control` 等 Anthropic 特有字段无 Chat 对应项，翻译时丢弃。
+上游走 COSY 事件流协议，网关先转成 Chat Completions 格式，再按客户端协议翻回。`cache_control` 等 Anthropic 特有字段无 Chat 对应项，翻译时丢弃；上游思维链经 `reasoning_content` 通道结构化返回，Anthropic 客户端侧以纯文本块交付。
 
 ## 配置
 
@@ -59,21 +62,6 @@ Anthropic        ──→  anthropic_to_chat  ──→  gateway.qoder.com.cn
 
 ## 已知限制
 
-- **thinking / cache_control 丢失**：Anthropic 特有字段，Chat 协议无对应项
+- **cache_control 丢失**：Anthropic 特有字段，Chat 协议无对应项（上游亦无 Anthropic 式 prompt cache）
+- **Anthropic thinking 块丢弃**：客户端入站的 `thinking` 配置不透传（上游 `enable_thinking` 由模型推理属性决定）
 - **凭证隔离**：只读本目录凭证，绝不碰 Qoder 客户端本体
-
-## 项目结构
-
-```
-Qoder2api/
-├── server.py              # Flask 反代主体
-├── qoder_cosy.py          # 上游 COSY 协议客户端
-├── oauth.py               # OAuth 设备流登录
-├── webui.py               # WebUI 管理面板
-├── benefit.py             # 福利签到
-├── responses_bridge.py    # Responses ⇄ Chat 翻译层
-├── anthropic_bridge.py    # Anthropic ⇄ Chat 翻译层
-├── test_responses_route.py
-├── test_stream_errors_offline.py
-└── .env                   # 本地配置
-```

@@ -475,6 +475,10 @@ def _chat_direct_lines(messages, model_name, cid, now, rid, t0, temperature=None
         return {"id": cid, "object": "chat.completion.chunk", "created": now, "model": model_name,
                 "choices": [{"index": 0, "delta": delta, "finish_reason": fr}]}
 
+    salvager = rb.InvokeSalvage() if tools else None
+    tc_index = 0
+    salvaged_any = False
+
     try:
         attempts = 0
         produced = False
@@ -498,6 +502,40 @@ def _chat_direct_lines(messages, model_name, cid, now, rid, t0, temperature=None
                         continue
                     if etype == "usage":
                         usage = _openai_usage(ev["usage"])
+                        continue
+                    if etype == "content" and salvager is not None:
+                        # 正文回收：模型把工具调用写成 antml 文本（<invoke>…</invoke>）时拆回
+                        # 结构化 tool_calls；其余文本实时放行（有界前瞻 ≤14 字符）
+                        try:
+                            events = salvager.feed(ev["text"])
+                        except Exception:
+                            events = [("text", ev["text"])]  # 回收器异常 → 原样透传
+                        first = True
+                        for kind, payload in events:
+                            if kind == "text" and not payload:
+                                continue
+                            delta = {}
+                            if first and not role_sent:
+                                delta["role"] = "assistant"
+                                role_sent = True
+                            first = False
+                            if kind == "text":
+                                delta["content"] = payload
+                            else:
+                                delta["tool_calls"] = [{
+                                    "index": tc_index,
+                                    "id": "call_" + uuid.uuid4().hex[:24],
+                                    "type": "function",
+                                    "function": {
+                                        "name": payload["name"],
+                                        "arguments": json.dumps(payload["params"],
+                                                                 ensure_ascii=False),
+                                    },
+                                }]
+                                tc_index += 1
+                                salvaged_any = True
+                                logger.info("[%s] antml回收 -> tool_call %s", rid, payload["name"])
+                            yield f"data: {json.dumps(chunk(delta), ensure_ascii=False)}\n\n"
                         continue
                     delta = {}
                     if not role_sent:
@@ -541,6 +579,20 @@ def _chat_direct_lines(messages, model_name, cid, now, rid, t0, temperature=None
         err = {"error": {"message": str(e), "type": "api_error", "code": 502}}
         yield f"data: {json.dumps(err, ensure_ascii=False)}\n\n"
     if not errored:
+        # 回收器残留缓冲（未闭合块退回纯文本）；本回合回收过工具调用则收尾理由
+        # 必须是 tool_calls，否则客户端会当成模型已说完
+        if salvager is not None:
+            for kind, payload in salvager.flush():
+                if kind == "text" and payload:
+                    if rb._INVOKE_START in payload:
+                        logger.warning("[%s] 未闭合 invoke 块降级纯文本（%d 字符）", rid, len(payload))
+                    tail = {"id": cid, "object": "chat.completion.chunk", "created": now,
+                            "model": model_name,
+                            "choices": [{"index": 0, "delta": {"content": payload},
+                                         "finish_reason": None}]}
+                    yield f"data: {json.dumps(tail, ensure_ascii=False)}\n\n"
+            if salvaged_any and finish_reason in (None, "stop"):
+                finish_reason = "tool_calls"
         done = {"id": cid, "object": "chat.completion.chunk", "created": now, "model": model_name,
                 "choices": [{"index": 0, "delta": {}, "finish_reason": finish_reason or "stop"}]}
         yield f"data: {json.dumps(done, ensure_ascii=False)}\n\n"
@@ -642,6 +694,29 @@ def _full_chat_direct(messages, model_name, cid, now, max_tokens, temperature=No
     message = {"role": "assistant", "content": "".join(content_parts)}
     if thinking_parts:
         message["reasoning_content"] = "".join(thinking_parts)
+    # 非流式回收：模型把工具调用写成 antml 文本时拆回结构化 tool_calls（排在原有之后）
+    if tools and message["content"]:
+        try:
+            salv = rb.InvokeSalvage()
+            events = salv.feed(message["content"]) + salv.flush()
+        except Exception:
+            events = [("text", message["content"])]
+        texts, calls = [], []
+        for kind, payload in events:
+            if kind == "text":
+                texts.append(payload)
+            else:
+                calls.append({"id": "call_" + uuid.uuid4().hex[:24], "type": "function",
+                              "function": {"name": payload["name"],
+                                           "arguments": json.dumps(payload["params"],
+                                                                    ensure_ascii=False)}})
+        message["content"] = "".join(texts) or None
+        if calls:
+            logger.info("[%s] antml回收 -> tool_call %s", getattr(g, "rid", "?"),
+                        [c["function"]["name"] for c in calls])
+            base = max(tool_calls) + 1 if tool_calls else 0
+            for i, c in enumerate(calls):
+                tool_calls[base + i] = c
     if tool_calls:
         message["tool_calls"] = [tool_calls[k] for k in sorted(tool_calls)]
         finish_reason = "tool_calls"

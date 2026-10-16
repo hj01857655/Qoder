@@ -21,6 +21,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import socket
 import threading
 import time
@@ -610,6 +611,14 @@ def _content_blocks(content) -> list[dict]:
     return []
 
 
+_THINK_TAG_RE = re.compile(r"</?think>")
+
+
+def _strip_think_tags(text: str) -> str:
+    """剥掉内联进正文的 think 模板标签（断开历史回显污染链）。"""
+    return _THINK_TAG_RE.sub("", text) if text else text
+
+
 def _qoder_messages(messages: list[dict]) -> list[dict]:
     """将 OpenAI messages 转为 Qoder 格式（跳过 system，保留 tool_calls / tool 结果）"""
     out = []
@@ -625,6 +634,13 @@ def _qoder_messages(messages: list[dict]) -> list[dict]:
             })
             continue
         entry = {"role": role, "content": _content_blocks(m.get("content", ""))}
+        if role == "assistant" and entry["content"]:
+            # 历史助手正文里的内联 think 标签剥掉，防止被污染的会话每轮回显；
+            # 剥完只剩空白的 text 块直接丢弃（如 "\n</think>\n\n" 整条变空）
+            entry["content"] = [
+                {**b, "text": _strip_think_tags(b["text"])} for b in entry["content"]
+            ]
+            entry["content"] = [b for b in entry["content"] if b["text"].strip()]
         # 客户端回传思考时原样带上（协议出站也叫 reasoning_content，不发明新字段）
         if role == "assistant" and m.get("reasoning_content"):
             entry["reasoning_content"] = m["reasoning_content"]
@@ -786,6 +802,85 @@ def _iter_sse_lines(resp):
         resp.close()
 
 
+class _ThinkSplitter:
+    """跨 chunk 的 <think> 内联标签分流状态机。
+
+    背景：Qoder 上游偶发不走 reasoning_content 结构化通道，把推理模板
+    <think>…</think>（有时只有孤立的闭合标签）内联在 delta.content 里；
+    直接透传会让客户端把标签当正文渲染并存进会话历史，之后每轮回显。
+
+    规则：<think> 后内容归 reasoning，</think> 后回到正文；无配对的
+    孤立标签按噪声丢弃；流尾可能跨 chunk 断开的残缺片段暂存，flush 冲刷。
+    """
+
+    OPEN = "<think>"
+    CLOSE = "</think>"
+    _HOLD = len(CLOSE) - 1  # 可能是标签前缀的最长尾部片段
+
+    def __init__(self):
+        self.in_think = False
+        self._tail = ""       # 暂存的跨 chunk 残缺片段
+        self._pending = []    # 待取用的 (kind, text) 有序段
+
+    def feed(self, text):
+        buf = self._tail + text
+        self._tail = ""
+        segs = []
+        i = 0
+        while i < len(buf):
+            o, c = buf.find(self.OPEN, i), buf.find(self.CLOSE, i)
+            if self.in_think:
+                # think 段内：闭合标签翻出；再现的 <think> 是噪声，丢弃不翻状态
+                if c < 0 or (0 <= o < c):
+                    hit, tag, closing = o, self.OPEN, None
+                else:
+                    hit, tag, closing = c, self.CLOSE, True
+            else:
+                if o < 0:
+                    hit, tag, closing = c, self.CLOSE, True
+                elif c < 0 or o < c:
+                    hit, tag, closing = o, self.OPEN, False
+                else:
+                    hit, tag, closing = c, self.CLOSE, True
+            if hit < 0:
+                # 无完整标签：仅暂存可能是标签前缀的尾部，其余按当前状态归属
+                keep = 0
+                for k in range(min(self._HOLD, len(buf) - i), 0, -1):
+                    seg = buf[len(buf) - k:]
+                    if self.OPEN.startswith(seg) or self.CLOSE.startswith(seg):
+                        keep = k
+                        break
+                body = buf[i:len(buf) - keep]
+                if body:
+                    segs.append(("reasoning" if self.in_think else "content", body))
+                self._tail = buf[len(buf) - keep:]
+                break
+            body = buf[i:hit]
+            if body:
+                segs.append(("reasoning" if self.in_think else "content", body))
+            # 配对的开关标签翻转状态；错配/嵌套的孤立标签按噪声丢弃
+            if closing is not None and closing == self.in_think:
+                self.in_think = not self.in_think
+            i = hit + len(tag)
+        for kind, text in segs:
+            if self._pending and self._pending[-1][0] == kind:
+                self._pending[-1] = (kind, self._pending[-1][1] + text)
+            else:
+                self._pending.append((kind, text))
+
+    def drain(self):
+        out, self._pending = self._pending, []
+        return out
+
+    def flush(self):
+        out = self._pending
+        self._pending = []
+        if self._tail:
+            out.append(("reasoning" if self.in_think else "content", self._tail))
+            self._tail = ""
+        return out
+
+
 def run_qoder_cosy(
     messages: list[dict],
     model: str = "Auto",
@@ -882,6 +977,7 @@ def run_qoder_cosy(
         raise UpstreamError(resp.status_code, resp.text[:500])
 
     # 上游对这两个 path 只回 SSE，没有 JSON 单体响应形态
+    splitter = _ThinkSplitter()
     for line in _iter_sse_lines(resp):
         if not line or not line.startswith("data:"):
             continue
@@ -930,10 +1026,13 @@ def run_qoder_cosy(
         if reasoning:
             yield {"type": "reasoning", "text": reasoning}
 
-        # 正文内容
+        # 正文内容：经 <think> 分流（上游偶发把推理模板标签内联进 content，
+        # 直接透传会被客户端当正文渲染并存进会话历史）
         content = delta.get("content", "")
         if content:
-            yield {"type": "content", "text": content}
+            splitter.feed(content)
+            for kind, text in splitter.drain():
+                yield {"type": kind, "text": text}
 
         # tool calls：原样透传增量片段（客户端按 index 拼接 arguments）
         tool_calls = delta.get("tool_calls")
@@ -943,6 +1042,11 @@ def run_qoder_cosy(
         finish_reason = choice.get("finish_reason")
         if finish_reason:
             yield {"type": "finish", "reason": finish_reason}
+
+    # 流尽：冲刷跨 chunk 残留的标签前缀
+    for kind, text in splitter.flush():
+        if text:
+            yield {"type": kind, "text": text}
 
 
 # ── 测试 ──────────────────────────────────────────────────────────────────────
