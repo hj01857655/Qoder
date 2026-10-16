@@ -213,6 +213,29 @@ def _stream_log(gen, rid, t0):
         raise
 
 
+# ── 未知路径/方法：回 JSON 而非 Flask 默认 HTML ────────────────────────────────
+# 起因：Claude Code 把 base URL 填成 .../v1 时，请求打到 /v1/v1/messages，Flask 回
+# 默认 HTML 404，客户端误报成"模型不可用/不存在"。此处统一成 JSON 错误体，且
+# /messages 路用 Anthropic 形状，便于当场定位。
+def _error_payload(err_type, path):
+    msg = "Not Found: %s" % path
+    if "/messages" in path:
+        # 多半是 Anthropic 客户端 base URL 多带了 /v1，与服务端 /v1/messages 叠加
+        msg += "（Anthropic 客户端 base URL 应填 host:port，不含 /v1）"
+        return ab.error_body(err_type, msg)
+    return {"error": {"message": msg, "type": err_type}}
+
+
+@app.errorhandler(404)
+def _not_found(e):
+    return jsonify(_error_payload("not_found_error", request.path)), 404
+
+
+@app.errorhandler(405)
+def _method_not_allowed(e):
+    return jsonify(_error_payload("invalid_request_error", request.path)), 405
+
+
 # ── 模型列表 ──────────────────────────────────────────────────────────────────
 @app.route("/v1/models", methods=["GET"])
 def models():

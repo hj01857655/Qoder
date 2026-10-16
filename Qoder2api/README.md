@@ -66,4 +66,6 @@ Anthropic        ──→  anthropic_bridge     ──→  gateway.qoder.com.cn
 
 - **cache_control 丢失**：Anthropic 特有字段，Chat 协议无对应项（上游亦无 Anthropic 式 prompt cache）
 - **Anthropic thinking 块丢弃**：客户端入站的 `thinking` 配置不透传（上游 `enable_thinking` 由模型推理属性决定）
+- **Anthropic base URL 不带 `/v1`**：`ANTHROPIC_BASE_URL` 填 `http://host:port` 即可，客户端自己补 `/v1/messages`；若填成 `.../v1`，请求会打到 `/v1/v1/messages`。此前会收到 Flask 默认 HTML 404（被 Claude Code 误报成"模型不可用"），现已统一回 JSON 错误体，且 `/messages` 路附上该提示。
+- **流式 usage 在末帧给出**：上游只在流末产 usage，故 `message_start.usage` 是占位零，真实 `input_tokens`/`output_tokens` 在收尾的 `message_delta.usage` 里（客户端按后者算上下文占用与成本）。
 - **凭证隔离**：只读本目录凭证，绝不碰 Qoder 客户端本体

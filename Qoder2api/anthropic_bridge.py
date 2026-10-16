@@ -348,6 +348,9 @@ def chat_sse_to_anthropic(stream, model):
           上游错误帧 -> error 事件后结束。
     """
     msg_id = "msg_" + _hex(24)
+    # message_start 必须早于上游数据发出，而 qoder 只在流末带 usage，
+    # 故此处只能给占位零；真正的 input/output 在收尾 message_delta 里补全
+    # （客户端按后者算上下文占用与成本）。
     base_usage = {"input_tokens": 0, "output_tokens": 0,
                   "cache_creation_input_tokens": 0,
                   "cache_read_input_tokens": 0}
@@ -459,10 +462,12 @@ def chat_sse_to_anthropic(stream, model):
     for idx in range(len(blocks)):
         yield _ant_frame("content_block_stop", {"index": idx})
 
-    out_tokens = int((usage or {}).get("completion_tokens") or 0) if usage else 0
+    # 收尾补全 usage：现代 Anthropic message_delta.usage 带 input_tokens，
+    # 上游 chat 的 prompt_tokens 必须在此透出——否则客户端恒见 input_tokens=0，
+    # 上下文占用/成本统计与自动压缩判据全部失真（此前只透 completion_tokens）。
     yield _ant_frame("message_delta", {
         "delta": {"stop_reason": _stop_reason(finish), "stop_sequence": None},
-        "usage": {"output_tokens": out_tokens}})
+        "usage": _anthropic_usage(usage)})
     yield _ant_frame("message_stop", {})
 
 
