@@ -186,15 +186,19 @@ def _log_response(response):
     return response
 
 
-def _stream_log(gen, rid, t0):
+def _stream_log(gen, rid, t0, ttft_skip=0):
     """包裹 SSE 生成器：TTFT、字节数、原文落盘、done/断开/中断日志。
-    rid/t0 必须在请求上下文中取出后传入（生成器被消费时 g 已销毁）。"""
+    rid/t0 必须在请求上下文中取出后传入（生成器被消费时 g 已销毁）。
+    ttft_skip：开头 N 帧不计入 TTFT。Anthropic 桥会先秒发一帧自造的开场
+    message_start（不解析上游），照常停表会恒得 0.0s，故该路传 1。"""
     total = 0
     ttft = None
+    seen = 0
     buf = [] if DUMP_ON else None
     try:
         for piece in gen:
-            if ttft is None:
+            seen += 1
+            if ttft is None and seen > ttft_skip:
                 ttft = time.time() - t0
             total += len(piece)
             if buf is not None:
@@ -414,7 +418,7 @@ def responses_api():
             for frame in rb.chat_sse_to_responses(lines, model_req):
                 yield frame.decode("utf-8")
 
-        return Response(_stream_log(generate(), rid, t0), mimetype="text/event-stream",
+        return Response(_stream_log(generate(), rid, t0, ttft_skip=2), mimetype="text/event-stream",
                         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     result = _full_chat_direct(messages, model_req, cid, now, max_tokens, temperature,
@@ -465,7 +469,7 @@ def messages_api():
             for frame in ab.chat_sse_to_anthropic(lines, model_req):
                 yield frame.decode("utf-8")
 
-        return Response(_stream_log(generate(), rid, t0), mimetype="text/event-stream",
+        return Response(_stream_log(generate(), rid, t0, ttft_skip=1), mimetype="text/event-stream",
                         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     result = _full_chat_direct(messages, model_req, cid, now, max_tokens, temperature,
